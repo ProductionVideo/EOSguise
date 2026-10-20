@@ -3,7 +3,7 @@ const time=n=>Number.isFinite(n)?[Math.floor(n/3600),Math.floor(n/60)%60,Math.fl
 function buttons(){document.querySelectorAll('[data-action]').forEach(b=>b.disabled=busy||!fresh);}
 async function poll(){try{
  const r=await fetch('/api/state',{signal:AbortSignal.timeout(3000)});if(!r.ok)throw Error();const s=await r.json(),d=s.disguise;
- revision=s.settings.revision;$('#transport-name').textContent=d.transport||s.settings.transportName;fresh=d.connected&&s.now-d.updated<5000;$('#status').textContent=fresh?'Live':'Disconnected';$('#status').title=d.error||d.warning||'';$('#feedback').textContent=fresh?(d.warning||''):(d.error||d.warning||'');$('#director').classList.toggle('offline',!fresh);
+ revision=s.settings.revision;$('#transport-name').textContent=d.transport||s.settings.transportName;fresh=d.connected&&s.now-d.updated<5000;$('#status').textContent=fresh?'Live':'Disconnected';$('#status').title=d.error||d.warning||'';$('#feedback').textContent=fresh?(d.warning||''):[d.error,d.warning].filter(Boolean).join(' · ');$('#director').classList.toggle('offline',!fresh);
  $('#track').textContent=d.track||'Waiting for Designer';$('#section').textContent=d.section?`Section ${d.section}${d.sectionName?' · '+d.sectionName:''}`:'…';
  $('#engaged').textContent=d.engaged?'Engaged':'Disengaged';$('#engaged').className=d.engaged?'engaged':'';
  $('#mode').textContent=({HoldSection:'Holding at section end',PlaySection:'Play to section end',Play:'Playing',Stop:'Stopped',LoopSection:'Loop section'})[d.playmode]||d.playmode||'Unknown';
