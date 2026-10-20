@@ -7,6 +7,7 @@
 - Support keyboard cue entry, Enter to send, Backspace to edit and Escape to clear. Successful sends clear the entry for the next cue.
 - Reject missing cues with a clear error; preserve the entry on failure and avoid sending while the catalogue is unavailable.
 - Add regression tests for fading cue feedback, cue-list following, reconnects and keyboard controls.
+- Show each cue's time in the Overview cue lists, Eos style ("5", or "5 / 3" when up and down differ), with a "Cue times" tickbox to hide the column.
 
 ## 0.1.2
 
