@@ -7,6 +7,9 @@
 - Support keyboard cue entry, Enter to send, Backspace to edit and Escape to clear. Successful sends clear the entry for the next cue.
 - Reject missing cues with a clear error; preserve the entry on failure and avoid sending while the catalogue is unavailable.
 - Add regression tests for fading cue feedback, cue-list following, reconnects and keyboard controls.
+- Fix Disguise Live Update never connecting for transports whose UID exceeds the signed 64-bit range: subscribe with getByUID in hex instead of decimal.
+- Keep the Live Update connection open when Designer rejects a property, treat any Live Update message as liveness, and match subscriptions regardless of path spacing or id type.
+- Show why the Director is disconnected on the Overview and Disguise pages and in error.log.
 
 ## 0.1.2
 
