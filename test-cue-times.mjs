@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+const context=vm.createContext({document:{querySelector:()=>null}});
+const source=fs.readFileSync(new URL('./app.js',import.meta.url),'utf8');
+vm.runInContext(source.slice(0,source.indexOf('function render()'))+';this.cueTime=cueTime;',context);
+const t=(up,down)=>context.cueTime({up,down});
+assert.equal(t(5000,5000),'5','Matching up and down show one time');
+assert.equal(t(5000,3000),'5 / 3','Different up and down show both');
+assert.equal(t(2500,2500),'2.5');
+assert.equal(t(0,0),'0');
+assert.equal(t(90000,90000),'1:30');
+assert.equal(t(61300,5000),'1:01.3 / 5');
+assert.equal(t(5000,-1),'5','Unset down time shows up only');
+assert.equal(t(-1,-1),'','Unset times show nothing');
+assert.equal(t(undefined,undefined),'','Cues without times show nothing');
+assert.equal(t(null,null),'','Missing times from JSON show nothing');
+console.log('PASS: Eos-style cue times, split up/down, minutes, decimals and missing times');

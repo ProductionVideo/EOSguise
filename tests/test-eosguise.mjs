@@ -11,7 +11,7 @@ try{
   if(address==='/eos/ping')s.write(slip(message('/eos/out/ping',args)));
   else if(address==='/eos/newcmd')eosCommands.push(args[0]);
   else if(address.endsWith('/count'))s.write(slip(message(address.replace('/eos/','/eos/out/'),[2])));
-  else {const m=address.match(/^\/eos\/get\/cue\/(\d+)\/index\/(\d+)$/);if(m){const number=['0.3','13'][Number(m[2])];s.write(slip(message(`/eos/out/get/cue/${m[1]}/${number}/0/list/0/1`,[Number(m[2]),number,'Mock cue'])));}}
+  else {const m=address.match(/^\/eos\/get\/cue\/(\d+)\/index\/(\d+)$/);if(m){const number=['0.3','13'][Number(m[2])];s.write(slip(message(`/eos/out/get/cue/${m[1]}/${number}/0/list/0/1`,[Number(m[2]),number,'Mock cue',...[[5000,0,5000],[2500,0,90000]][Number(m[2])]])));}}
  }));});eos.listen(0,'127.0.0.1');await once(eos,'listening');
  const spare=net.createServer().listen(0,'127.0.0.1');await once(spare,'listening');const port=spare.address().port;await new Promise(r=>spare.close(r));
  const cfg={director:'http://127.0.0.1:'+director.address().port,eosHost:'127.0.0.1',eosPort:eos.address().port,cueLists:[1,2],controlList:2,transportUid:'111',transportName:'show',revision:1,port,lanAddress:'',additionalAddresses:[]};const config=new URL('config.json',dir);fs.writeFileSync(config,JSON.stringify(cfg));
@@ -27,7 +27,7 @@ try{
  const changed={...cfg,transportUid:'222',cueLists:[7,9],controlList:9};assert.equal((await post('/api/settings',changed)).status,200);await until(async()=>(await state()).disguise.transportUid==='222'&&(await state()).disguise.connected);
  assert.equal((await post('/api/disguise/command',{action:'play',revision:1})).status,409);assert.equal((await post('/api/eos/goto',{cue:'13',revision:1})).status,409);
  assert.equal((await post('/api/disguise/command',{action:'next',revision:2})).status,200);assert.equal(calls.at(-1).body.transports[0].transport.uid,'222');
- await until(async()=>(await(await fetch(base+'/api/cues')).json()).some(c=>c.list===9&&c.number==='13'));
+ await until(async()=>(await(await fetch(base+'/api/cues')).json()).some(c=>c.list===9&&c.number==='13'));{const c=(await(await fetch(base+'/api/cues')).json()).find(c=>c.list===9&&c.number==='13');assert.equal(c.up,2500);assert.equal(c.down,90000);}
  assert.equal((await post('/api/eos/goto',{cue:'13',revision:2})).status,200);assert.equal(eosCommands.at(-1),'Go_To_Cue 9 / 13 Enter');
  assert.equal(JSON.parse(fs.readFileSync(config)).transportUid,'222');
  for(const ws of wsServer.clients)ws.terminate();await until(async()=>!(await state()).disguise.connected);assert.equal((await post('/api/disguise/command',{action:'play',revision:2})).status,503);await until(async()=>(await state()).disguise.connected);assert.equal((await state()).disguise.transportUid,'222');

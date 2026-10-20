@@ -17,6 +17,10 @@ function followCurrent(){
   followed[list]=number;
  }
 }
+// Eos sends cue times in milliseconds; show them as Eos does (5, 2.5, 1:30) with "up / down" when they differ.
+const seconds=ms=>{const s=Math.round(ms/100)/10;return s<60?String(s):Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')+(s%1?String(Math.round(s%1*10)/10).slice(1):'');};
+const set=ms=>Number.isFinite(ms)&&ms>=0;
+const cueTime=c=>!set(c.up)?'':set(c.down)&&c.down!==c.up?seconds(c.up)+' / '+seconds(c.down):seconds(c.up);
 const renderedLists={},renderedListIds={};
 function results(){
  const q=$('#query').value.trim().toLowerCase();
@@ -36,7 +40,7 @@ function results(){
    const scroll=wrap.scrollTop,bounds=wrap.getBoundingClientRect();
    const anchor=Array.from(body.children).find(row=>row.getBoundingClientRect().bottom>bounds.top+30);
    const anchorNumber=anchor?.firstElementChild.textContent,offset=anchor?.getBoundingClientRect().top;
-   const rows=found.map(c=>{const tr=document.createElement('tr');for(const value of [c.number,c.name||'(Unlabelled)','']){const td=document.createElement('td');td.textContent=value;tr.append(td);}return tr;});
+   const rows=found.map(c=>{const tr=document.createElement('tr');for(const [value,cls] of [[c.number],[c.name||'(Unlabelled)'],[cueTime(c),'time-col'],['']]){const td=document.createElement('td');td.textContent=value;if(cls)td.className=cls;tr.append(td);}return tr;});
    body.replaceChildren(...rows);renderedLists[list]=signature;
    const replacement=rows.find(row=>row.firstElementChild.textContent===anchorNumber);
    wrap.scrollTop=scroll;
@@ -55,6 +59,10 @@ $('#autofollow').addEventListener('change',()=>{
  try{localStorage.setItem('show-follow-auto',String($('#autofollow').checked));}catch{}
  followed[1]=followed[2]=null;followCurrent();
 });
+const showTimes=()=>$('.search').classList.toggle('hide-times',!$('#cuetimes').checked);
+try{$('#cuetimes').checked=localStorage.getItem('show-cue-times')!=='false';}catch{}
+showTimes();
+$('#cuetimes').addEventListener('change',()=>{try{localStorage.setItem('show-cue-times',String($('#cuetimes').checked));}catch{}showTimes();});
 $('#query').addEventListener('input',()=>{followed[1]=followed[2]=null;results();});poll();
 if(typeof ResizeObserver!=='undefined'){
  const observer=new ResizeObserver(()=>followCurrent());
