@@ -16,6 +16,8 @@ export function matchSubscriptions(subs){
  if(!out.size&&subs.length===keys.length)subs.forEach((s,i)=>out.set(String(s.id),keys[i]));
  return out;
 }
+// Designer expressions take UIDs in hex; decimal UIDs above int64 fail to parse ("InvalidCharacter").
+export const objectPath=uid=>'getByUID(0x'+BigInt(uid).toString(16)+')';
 export const reason=e=>e?.name==='TimeoutError'?'timed out':e?.cause?.code||e?.cause?.message||e?.message||String(e);
 export async function discover(director,request=fetch){
  let r;try{r=await request(director+'/api/session/transport/activetransport',{signal:AbortSignal.timeout(5000)});}catch(e){throw Error('Cannot reach Director at '+director+' ('+reason(e)+')');}
@@ -38,7 +40,7 @@ export function createLive(cfg,onState,{Socket=WebSocket,request=fetch,retryMs=3
    const socket=ws=new Socket(url,{handshakeTimeout:5000});
    socket.on('open',()=>{
     if(gen!==epoch)return socket.close();pongAt=Date.now();
-    socket.send(JSON.stringify({subscribe:{object:'getByUID('+selected.uid+')',properties:Object.values(properties),configuration:{updateFrequencyMs:250}}}));
+    socket.send(JSON.stringify({subscribe:{object:objectPath(selected.uid),properties:Object.values(properties),configuration:{updateFrequencyMs:250}}}));
     heartbeat=setInterval(()=>{if(gen!==epoch)return;if(Date.now()-pongAt>6500){fail('Director feedback timed out');socket.terminate();return;}socket.ping();},heartbeatMs);
    });
    socket.on('pong',()=>{if(gen!==epoch)return;pongAt=Date.now();snapshot.updated=pongAt;publish();});
