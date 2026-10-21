@@ -34,7 +34,7 @@ for(const [file,text] of sources){
  assert.ok(!/from\s+['"]\.\.\//.test(text),file+' imports only website modules');
  for(const m of text.matchAll(/https:\/\/www\.gstatic\.com\/[^'"]+/g))assert.match(m[0],/^https:\/\/www\.gstatic\.com\/firebasejs\/\d+\.\d+\.\d+\/firebase-(app|database)\.js$/,'Pinned Firebase SDK only');
 }
-assert.deepEqual(sources.map(([f])=>f).sort(),['favicon.svg','firebase-config.json','index.html','js/app.js','js/data.js','js/identity.js','js/model.js','style.css']);
+assert.deepEqual(sources.map(([f])=>f).sort(),['favicon.svg','firebase-config.json','index.html','install.sh','js/app.js','js/data.js','js/identity.js','js/model.js','style.css']);
 const hosting=JSON.parse(fs.readFileSync(new URL('../cloud/firebase.json',import.meta.url))).hosting;
 const csp=hosting.headers[0].headers.find(h=>h.key==='Content-Security-Policy').value;
 assert.match(csp,/script-src 'self' https:\/\/www\.gstatic\.com;/);assert.match(csp,/style-src 'self';/);assert.ok(!csp.includes('unsafe'));
