@@ -6,10 +6,18 @@ Show utility for Eos cue feedback/control and Disguise transport feedback/contro
 
 ## Install
 
+**macOS and Linux, quickest:** paste this into Terminal. It downloads and installs cuedo in one step, with no security prompts:
+
+```
+curl -fsSL https://cues.stage.wiki/install.sh | bash
+```
+
+**Or from the download:**
+
 1. Download **Code > Download ZIP** from this repository and extract it anywhere (for example Downloads).
 2. Run the installer for your system:
    - **Windows:** double-click **install-windows.cmd**. If SmartScreen warns about a downloaded file, choose **More info > Run anyway**.
-   - **macOS:** double-click **install-mac.command**. The first time, macOS may block it as being from an unidentified developer: right-click it, choose **Open**, then **Open** again.
+   - **macOS:** double-click **install-mac.command**. macOS blocks scripts downloaded in a browser: after the warning, open **System Settings > Privacy & Security** and choose **Open Anyway** (the Terminal command above avoids this).
    - **Linux:** run `./install-linux.sh` (or `bash install-linux.sh`).
 3. The installer copies cuedo to your user folder, sets it to start when you log in, starts it and opens http://127.0.0.1:13579/ in your browser. The downloaded folder can then be deleted.
 4. In Settings, set the Director address, refresh transports and choose one. Set Eos host, OSC TCP port, two displayed cue lists and the list to control. Save.

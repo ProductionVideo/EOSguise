@@ -20,6 +20,7 @@ Eos + Disguise <-> cuedo runtime on the show LAN
   - `js/model.js`: validation of untrusted database values, freshness and formatting.
   - `js/identity.js`: show-name to ID logic, byte-identical to `../cloud-identity.mjs` in the runtime.
   - `firebase-config.json`: the database address only. No API key is used or needed.
+  - `install.sh`: the macOS/Linux one-line installer (`curl -fsSL https://cues.stage.wiki/install.sh | bash`). It downloads cuedo from GitHub and runs `scripts/install.sh`; it is not part of the dashboard.
 - `database.rules.json`: the deployed v1 contract. Root read/write denied; `/shows/{id}` and `/showData/{id}` envelopes validated.
 - `firebase.json`, `.firebaserc`: Hosting site `stagewiki-cues`, SPA rewrite, security headers and CSP.
 - `tests/`: emulator end-to-end test, a local static server and a small headless Chrome driver.
