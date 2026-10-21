@@ -1,8 +1,3 @@
 {
-  "projectId": "stagewiki-cues",
-  "appId": "1:414602027201:web:eac05064437f3ab030f440",
-  "databaseURL": "https://stagewiki-cues-default-rtdb.europe-west1.firebasedatabase.app",
-  "apiKey": "AIzaSyCu7xch2sbwl2z9h-UyM__HIrcni4q2VU4",
-  "authDomain": "stagewiki-cues.firebaseapp.com",
-  "messagingSenderId": "414602027201"
+  "databaseURL": "https://stagewiki-cues-default-rtdb.europe-west1.firebasedatabase.app"
 }

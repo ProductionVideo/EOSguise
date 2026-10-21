@@ -19,7 +19,7 @@ Eos + Disguise <-> cuedo runtime on the show LAN
   - `js/data.js`: Firebase SDK listeners (pinned 11.10.0 from www.gstatic.com) and the REST URL used by Delete.
   - `js/model.js`: validation of untrusted database values, freshness and formatting.
   - `js/identity.js`: show-name to ID logic, byte-identical to `../cloud-identity.mjs` in the runtime.
-  - `firebase-config.json`: public SDK identifiers, not a credential.
+  - `firebase-config.json`: the database address only. No API key is used or needed.
 - `database.rules.json`: the deployed v1 contract. Root read/write denied; `/shows/{id}` and `/showData/{id}` envelopes validated.
 - `firebase.json`, `.firebaserc`: Hosting site `stagewiki-cues`, SPA rewrite, security headers and CSP.
 - `tests/`: emulator end-to-end test, a local static server and a small headless Chrome driver.

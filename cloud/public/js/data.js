@@ -4,7 +4,8 @@ import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase
 import {getDatabase,connectDatabaseEmulator,ref,onValue} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js';
 
 export function connect(config){
- const db=getDatabase(initializeApp({apiKey:config.apiKey,appId:config.appId,projectId:config.projectId,databaseURL:config.databaseURL}));
+ // Only the database address is needed: reads are public under the database rules, so no API key is used.
+ const db=getDatabase(initializeApp({databaseURL:config.databaseURL}));
  // Local testing only: the deployed firebase-config.json has no emulator entry.
  const emulator=typeof config.emulator==='string'?config.emulator.match(/^(127\.0\.0\.1|localhost):(\d+)$/):null;
  if(emulator)connectDatabaseEmulator(db,emulator[1],Number(emulator[2]));
