@@ -49,6 +49,12 @@ export function ageText(ms){
  if(s<5)return 'just now';if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+' min ago';if(s<86400)return Math.floor(s/3600)+' h ago';
  return Math.floor(s/86400)+' d ago';
 }
+// Short age for single-line rows: "now", "12s", "3m", "2h", "4d".
+export function shortAge(ms){
+ if(!Number.isFinite(ms))return 'never';
+ const s=Math.max(0,Math.round(ms/1000));
+ return s<5?'now':s<60?s+'s':s<3600?Math.floor(s/60)+'m':s<86400?Math.floor(s/3600)+'h':Math.floor(s/86400)+'d';
+}
 export function clock(seconds){
  if(!Number.isFinite(seconds))return '…';
  const t=Math.max(0,Math.floor(seconds));

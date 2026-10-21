@@ -75,7 +75,7 @@ try{
   const page=await browser.page();
   await page.goto(site+'/');
   await until(()=>page.evaluate(`document.querySelectorAll('.show-row').length===2`),'directory rows');
-  assert.equal(await page.text('#connection'),'Live');
+  assert.equal(await page.text('#connection'),'Live','Connection banner reads Live (visually hidden)');
   const names=await page.evaluate(`[...document.querySelectorAll('.show-name')].map(e=>e.textContent).sort()`);
   assert.deepEqual(names,['<img src=x onerror="window.__xss=1"> Panto','Hamlet'],'Hostile names render as text');
   // Directory search
@@ -96,7 +96,7 @@ try{
   // Direct link to Hamlet: current cue, times and catalogue; then a live detail update.
   await page.goto(site+'/show/'+idA);
   await until(()=>page.evaluate(`document.querySelector('.cue-number')?.textContent==='12.5'&&document.querySelectorAll('tbody tr').length>=41`),'detail render');
-  assert.equal(await page.evaluate(`document.querySelector('.cue-fade').textContent`),'Time 1:30 / 5');
+  assert.equal(await page.evaluate(`document.querySelector('.cue-fade').textContent`),'Time 1:30 / 5','Fade shown with hidden label');
   assert.equal(await page.evaluate(`document.querySelector('tr.current td').textContent`),'12.5');
   a.state={...a.state,eos:{...a.state.eos,lists:{...a.state.eos.lists,1:{name:'Main',current:{number:'13',name:'Night',notes:''},next:{number:'14',name:'Dawn',notes:''}}}}};
   await until(()=>page.evaluate(`document.querySelector('.cue-number')?.textContent==='13'&&document.querySelector('tr.current td')?.textContent==='13'`),'detail live update');
@@ -106,6 +106,24 @@ try{
   await page.evaluate(`(()=>{const i=document.querySelector('#cue-query');i.value='';i.dispatchEvent(new Event('input'));document.querySelector('#show-times').click();})()`);
   assert.equal(await page.evaluate(`document.querySelectorAll('th.time').length`),0,'Times hidden');
   await page.evaluate(`document.querySelector('#show-times').click()`);
+  // List switcher: one table at a time.
+  assert.equal(await page.evaluate(`document.querySelectorAll('#list-tabs button').length`),2);
+  await page.evaluate(`document.querySelectorAll('#list-tabs button')[1].click()`);
+  await until(()=>page.evaluate(`document.querySelector('#list-tabs button.active')?.textContent.startsWith('List 2')&&document.querySelectorAll('tbody tr').length===0`),'switch to list 2');
+  await page.evaluate(`document.querySelectorAll('#list-tabs button')[0].click()`);
+  await until(()=>page.evaluate(`document.querySelectorAll('tbody tr').length>=41`),'back to list 1');
+  // Phone width: nothing scrolls sideways and long names stay on one line.
+  {const phone=await browser.page({width:390,height:844});
+   const long='A very long show name that would normally wrap onto several lines on a phone screen';shows.push(makeShow(2));
+   await shows.at(-1).publisher.configure({enabled:true,showName:long});
+   for(const path of ['/','/show/'+idA,'/show/'+(await showIdFor(long))]){
+    await phone.goto(site+path);
+    await until(()=>phone.evaluate(`document.querySelector('.show-row,.cue-number')!==null`),'phone render '+path);
+    await until(()=>phone.evaluate(`document.documentElement.scrollWidth<=window.innerWidth`),'no horizontal scroll at 390px on '+path,3000);
+   }
+   await phone.goto(site+'/');await until(()=>phone.evaluate(`[...document.querySelectorAll('.show-name')].some(n=>n.textContent.startsWith('A very long'))`),'long name listed');
+   assert.ok(await phone.evaluate(`[...document.querySelectorAll('.show-name')].every(n=>n.getClientRects().length===1&&n.offsetHeight<30)`),'Show names stay on one line');
+   assert.deepEqual(phone.errors,[]);phone.close();shows.at(-1).publisher.stop();}
   assert.deepEqual(page.errors,[],'No script errors or CSP violations');
 
   // Delete while still publishing: removed, then restored with the full catalogue by the next activity.
