@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="77 80 480 116" role="img" aria-labelledby="title desc"><title id="title">cuedo</title><desc id="desc">Custom geometric cuedo lettering with an even stroke weight.</desc><g fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="butt" stroke-linejoin="round">
+<path d="M147 126 A32 32 0 1 0 147 172"/>
+<path d="M184 117 V149 A32 32 0 0 0 248 149 V117 M248 149 V181"/>
+<path d="M282 149 H346 A32 32 0 1 0 338.5 169.6"/>
+<circle cx="412" cy="149" r="32"/><path d="M444 93 V181"/>
+<circle cx="510" cy="149" r="32"/>
+</g></svg>

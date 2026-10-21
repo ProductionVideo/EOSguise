@@ -7,7 +7,7 @@ export function packet(cue,list=2){
  return Buffer.from([192,...[...raw].flatMap(b=>b===192?[219,220]:b===219?[219,221]:[b]),192]);
 }
 export function transmit(data,host,port){return new Promise((resolve,reject)=>{
- const s=net.createConnection({host,port});const token='eosguise-'+Date.now()+'-'+Math.random().toString(16).slice(2);let phase='ready',done=false;
+ const s=net.createConnection({host,port});const token='cuedo-'+Date.now()+'-'+Math.random().toString(16).slice(2);let phase='ready',done=false;
  const finish=error=>{if(done)return;done=true;clearTimeout(timer);s.destroy();error?reject(error):resolve();};
  const timer=setTimeout(()=>finish(Error('Eos did not acknowledge connection traffic')),5000);
  s.on('error',finish);s.on('close',()=>{if(!done)finish(Error('Eos connection closed before acknowledgement'));});

@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {displayName} from './cloud-identity.mjs';
 export function validateSettings(input,current){
  const next={...current};
  const director=new URL(input.director.includes('://')?input.director:'http://'+input.director);
@@ -12,6 +13,14 @@ export function validateSettings(input,current){
  next.transportUid=String(input.transportUid||'');if(!/^\d+$/.test(next.transportUid))throw Error('Choose a transport');
  delete next.lanAddress;delete next.additionalAddresses;
  next.revision=(current.revision||0)+1;return next;
+}
+export function validateCloudSettings(input){
+ if(typeof input?.enabled!=='boolean')throw Error('Choose whether to publish');
+ const raw=typeof input.showName==='string'?input.showName:'';
+ const showName=raw.trim()?displayName(raw):'';
+ if(showName===null)throw Error('Show name must be 120 characters or fewer');
+ if(input.enabled&&!showName)throw Error('Enter a show name to publish');
+ return {publishEnabled:input.enabled,showName};
 }
 export function saveSettings(next,file=new URL('./config.json',import.meta.url)){
  const tmp=new URL('./config.next.json',file);fs.writeFileSync(tmp,JSON.stringify(next,null,2));fs.renameSync(tmp,file);

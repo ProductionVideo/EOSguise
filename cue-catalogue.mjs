@@ -1,9 +1,10 @@
 // Keep the published list intact until every requested cue index has arrived.
 export class CueCatalogue {
- constructor(){this.rows=new Map();this.pending=new Map();this.complete=new Set();}
- clear(){this.rows.clear();this.pending.clear();this.complete.clear();}
+ // version changes whenever the published rows may have changed (used by the cloud publisher).
+ constructor(){this.rows=new Map();this.pending=new Map();this.complete=new Set();this.version=0;}
+ clear(){this.version++;this.rows.clear();this.pending.clear();this.complete.clear();}
  reconnect(lists){
-  this.pending.clear();
+  this.pending.clear();this.version++;
   const active=new Set(lists.map(Number));
   for(const [key,cue] of this.rows)if(!active.has(cue.list))this.rows.delete(key);
   for(const list of this.complete)if(!active.has(list))this.complete.delete(list);
@@ -25,6 +26,7 @@ export class CueCatalogue {
   for(const [key,cue] of pending.rows)this.rows.set(key,cue);
   this.pending.delete(list);
   this.complete.add(list);
+  this.version++;
  }
  lookup(list,number){
   for(const cue of this.rows.values())if(cue.list===Number(list)&&cue.part===0&&Number(cue.number)===Number(number))return 'found';

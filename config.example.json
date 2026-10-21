@@ -10,5 +10,7 @@
   ],
   "port": 38304,
   "transportName": "show",
-  "director": "http://127.0.0.1"
+  "director": "http://127.0.0.1",
+  "publishEnabled": false,
+  "showName": ""
 }
