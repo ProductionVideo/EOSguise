@@ -106,12 +106,17 @@ try{
   await page.evaluate(`(()=>{const i=document.querySelector('#cue-query');i.value='';i.dispatchEvent(new Event('input'));document.querySelector('#show-times').click();})()`);
   assert.equal(await page.evaluate(`document.querySelectorAll('th.time').length`),0,'Times hidden');
   await page.evaluate(`document.querySelector('#show-times').click()`);
-  // List switcher: one table at a time.
-  assert.equal(await page.evaluate(`document.querySelectorAll('#list-tabs button').length`),2);
-  await page.evaluate(`document.querySelectorAll('#list-tabs button')[1].click()`);
-  await until(()=>page.evaluate(`document.querySelector('#list-tabs button.active')?.textContent.startsWith('List 2')&&document.querySelectorAll('tbody tr').length===0`),'switch to list 2');
-  await page.evaluate(`document.querySelectorAll('#list-tabs button')[0].click()`);
-  await until(()=>page.evaluate(`document.querySelectorAll('tbody tr').length>=41`),'back to list 1');
+  // Wide screens show both lists side by side without the switcher.
+  assert.equal(await page.evaluate(`document.querySelectorAll('#catalogue-lists table').length`),2,'Both lists on desktop');
+  assert.equal(await page.evaluate(`document.querySelector('#list-tabs').hidden`),true);
+  // Phones: List 1 / List 2 switcher, one table at a time.
+  {const phone=await browser.page({width:390,height:844});await phone.goto(site+'/show/'+idA);
+   await until(()=>phone.evaluate(`document.querySelectorAll('#list-tabs button').length===2&&document.querySelectorAll('#catalogue-lists table').length===1`),'phone switcher');
+   await phone.evaluate(`document.querySelectorAll('#list-tabs button')[1].click()`);
+   await until(()=>phone.evaluate(`document.querySelector('#list-tabs button.active')?.textContent.startsWith('List 2')&&document.querySelectorAll('tbody tr').length===0`),'switch to list 2');
+   await phone.evaluate(`document.querySelectorAll('#list-tabs button')[0].click()`);
+   await until(()=>phone.evaluate(`document.querySelectorAll('tbody tr').length>=41`),'back to list 1');
+   assert.deepEqual(phone.errors,[]);phone.close();}
   // Phone width: nothing scrolls sideways and long names stay on one line.
   {const phone=await browser.page({width:390,height:844});
    const long='A very long show name that would normally wrap onto several lines on a phone screen';shows.push(makeShow(2));
