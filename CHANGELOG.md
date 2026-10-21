@@ -11,6 +11,8 @@
 - Keep the Live Update connection open when Designer rejects a property, treat any Live Update message as liveness, and match subscriptions regardless of path spacing or id type.
 - Show why the Director is disconnected on the Overview and Disguise pages and in error.log.
 
+- Optional public status website (cues.stage.wiki): enable with just a show name in Settings. Outbound-only, allowlisted telemetry; local controls and hardware are unaffected by cloud problems. The dashboard lists shows, shows current/next cues, cue lists with times and Disguise status, and lets visitors delete a listing.
+
 ## 0.1.2
 
 First public EOSguise release.

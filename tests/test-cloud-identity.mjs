@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';import {createHash} from 'node:crypto';
+import {displayName,canonicalName,showIdFor,isShowId} from '../cloud-identity.mjs';
+import * as site from '../cloud/public/js/identity.js';
+assert.equal(fs.readFileSync(new URL('../cloud-identity.mjs',import.meta.url),'utf8'),fs.readFileSync(new URL('../cloud/public/js/identity.js',import.meta.url),'utf8'),'Runtime and website identity must be byte-identical');
+const sha=s=>createHash('sha256').update(s,'utf8').digest('hex');
+assert.equal(await showIdFor('Example Show'),sha('example show'),'ID is SHA-256 of the UTF-8 canonical name');
+assert.equal(displayName('  Hamlet \t\n  Main Stage  '),'Hamlet Main Stage','Trim and collapse all whitespace');
+assert.equal(displayName('Ｈａｍｌｅｔ'),'Hamlet','NFKC normalisation');
+for(const variant of ['hamlet main stage','HAMLET  MAIN STAGE',' Ｈamlet　Main stage '])assert.equal(await showIdFor(variant),await showIdFor('Hamlet Main Stage'),'Collision by case/spacing/NFKC: '+variant);
+assert.notEqual(await showIdFor('Hamlet'),await showIdFor('Hamlet 2'));
+assert.equal(canonicalName('İSTANBUL'),'İSTANBUL'.toLowerCase(),'Locale-independent toLowerCase');
+for(const name of ['a.b','a#b','a$b','a[b]','a/b','..','__proto__','<script>'])assert.ok(isShowId(await showIdFor(name)),'Forbidden Firebase key characters never reach a key: '+name);
+assert.equal(displayName(''),null);assert.equal(displayName('   '),null);assert.equal(displayName(42),null);
+assert.equal(displayName('x'.repeat(120)),'x'.repeat(120));assert.equal(displayName('x'.repeat(121)),null);
+await assert.rejects(showIdFor(' '));
+assert.equal(await site.showIdFor('Example Show'),await showIdFor('Example Show'),'Website computes the same ID');
+assert.ok(!isShowId('A'.repeat(64))&&!isShowId('a'.repeat(63))&&isShowId('a'.repeat(64)));
+console.log('PASS: canonical names, NFKC/case/space collisions, forbidden key characters, length limits, identical runtime/website logic');

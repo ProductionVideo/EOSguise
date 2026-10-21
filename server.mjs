@@ -3,14 +3,15 @@ import {createListeners} from './listeners.mjs';
 import {addresses,allowedRequest} from './network.mjs';
 import {pathToFileURL} from 'node:url';
 import {createLive,discover} from './disguise-live.mjs';
-import {validateSettings,saveSettings} from './settings.mjs';
+import {validateSettings,validateCloudSettings,saveSettings} from './settings.mjs';
 import {createDirectorHandler} from './web-disguise.mjs';
 import {createCueHandler} from './web-eos.mjs';
+import {createPublisher} from './cloud-publisher.mjs';import {telemetryState} from './cloud-telemetry.mjs';
 import http from 'node:http';import net from 'node:net';import fs from 'node:fs';import {message,slip,parser} from './osc.mjs';
 const configFile=process.env.EOSGUISE_CONFIG?pathToFileURL(process.env.EOSGUISE_CONFIG):new URL('./config.json',import.meta.url);
 if(!fs.existsSync(configFile))fs.copyFileSync(new URL('./config.example.json',import.meta.url),configFile);
 const cfg=JSON.parse(fs.readFileSync(configFile));
-cfg.cueLists ||= [1,2];cfg.controlList ||= 2;cfg.revision ||= 1;
+cfg.cueLists ||= [1,2];cfg.controlList ||= 2;cfg.revision ||= 1;cfg.publishEnabled=cfg.publishEnabled===true;cfg.showName=typeof cfg.showName==='string'?cfg.showName:'';
 const state={app:'eosguise',eos:{connected:false,lastReceived:0,lists:{1:{name:'Cue list 1',current:null,next:null},2:{name:'Cue list 2',current:null,next:null}},loaded:0,total:0},disguise:{connected:false}};
 let reconnectTimer;
 let catalogueSource=null;
@@ -32,6 +33,9 @@ function connect(){const gen=++generation;clearTimeout(reconnectTimer);socket?.d
  }));socket.on('error',e=>{if(gen===generation)state.eos.error=e.message;});socket.on('close',()=>{if(gen===generation){state.eos.connected=false;reconnectTimer=setTimeout(connect,3000);}});}
 connect();setInterval(()=>{if(!state.eos.connected)return;if(queue.length)send(queue.shift());if(Date.now()-lastPing>5000){lastPing=Date.now();send('/eos/ping',['eosguise']);}if(Date.now()-state.eos.lastReceived>15000)socket.destroy();},40);
 let live=createLive(cfg,s=>{state.disguise=s;});
+// Public status publishing is opt-in and outbound only. EOSGUISE_CLOUD_DATABASE_URL is for local tests.
+const publisher=createPublisher({getState:()=>telemetryState(state,cfg.cueLists),getCatalogue:()=>({version:catalogue.version,values:catalogue.values()}),...(process.env.EOSGUISE_CLOUD_DATABASE_URL?{databaseURL:process.env.EOSGUISE_CLOUD_DATABASE_URL}:{})});
+publisher.configure({enabled:cfg.publishEnabled,showName:cfg.showName});
 let handleCue=createCueHandler(cfg,undefined,(list,cue)=>catalogue.lookup(list,cue)); let handleDirector=createDirectorHandler(cfg,()=>state.disguise);
 const assets={'/settings':['settings.html','text/html'],'/settings.js':['settings.js','text/javascript'],'/settings.css':['settings.css','text/css'],'/disguise':['disguise.html','text/html'],'/disguise.js':['disguise.js','text/javascript'],'/disguise.css':['disguise.css','text/css'],'/eos':['eos.html','text/html'],'/eos.js':['eos.js','text/javascript'],'/eos.css':['eos.css','text/css'],'/':['index.html','text/html'],'/app.js':['app.js','text/javascript'],'/style.css':['style.css','text/css']};
 function handler(req,res){res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Content-Security-Policy',"default-src 'self'; style-src 'self'; script-src 'self'; frame-ancestors 'self'");if(new URL(req.url,'http://localhost').pathname==='/api/disguise/command'){handleDirector(req,res).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}if(new URL(req.url,'http://localhost').pathname==='/api/eos/goto'){handleCue(req,res).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}if(new URL(req.url,'http://localhost').pathname.startsWith('/api/settings')||new URL(req.url,'http://localhost').pathname==='/api/transports'){settingsRoute(req,res).catch(e=>{if(!res.headersSent)res.writeHead(400,{'Content-Type':'application/json'});res.end(JSON.stringify({error:e.message}));});return;}if(req.method!=='GET'){res.writeHead(405);return res.end('Read only');}const u=new URL(req.url,'http://localhost');if(u.pathname==='/api/state'){res.setHeader('Content-Type','application/json');return res.end(JSON.stringify({...state,settings:{revision:cfg.revision,cueLists:cfg.cueLists,controlList:cfg.controlList,transportName:cfg.transportName},now:Date.now()}));}if(u.pathname==='/api/cues'){res.setHeader('Content-Type','application/json');return res.end(JSON.stringify([...catalogue.values()].filter(c=>c.part===0).sort((a,b)=>a.list-b.list||Number(a.number)-Number(b.number))));}const asset=assets[u.pathname];if(!asset){res.writeHead(404);return res.end('Not found');}res.setHeader('Content-Type',asset[1]+'; charset=utf-8');res.end(fs.readFileSync(new URL('./'+asset[0],import.meta.url)));}
@@ -41,6 +45,17 @@ async function settingsRoute(req,res){
  const u=new URL(req.url,'http://localhost');
  if(req.method==='GET'&&u.pathname==='/api/settings/network')return reply(200,{addresses:listeners.rows(),revision:cfg.revision});
  if(req.method==='GET'&&u.pathname==='/api/settings')return reply(200,cfg);
+ if(req.method==='GET'&&u.pathname==='/api/settings/cloud')return reply(200,{enabled:cfg.publishEnabled,showName:cfg.showName,status:publisher.status()});
+ if(req.method==='POST'&&u.pathname==='/api/settings/cloud'){
+  // Publishing changes never touch the Eos/Director connections and work while hardware is offline.
+  if(!allowedRequest(req,cfg.port))return reply(403,{error:'Open Settings from this server'});
+  if(saving)return reply(409,{error:'Settings are being saved'});
+  let text='';for await(const chunk of req){text+=chunk;if(text.length>1024)return reply(413,{error:'Request too large'});}
+  const next=validateCloudSettings(JSON.parse(text));
+  saveSettings({...cfg,...next},configFile);Object.assign(cfg,next);
+  await publisher.configure({enabled:cfg.publishEnabled,showName:cfg.showName});
+  return reply(200,{saved:true,enabled:cfg.publishEnabled,showName:cfg.showName,status:publisher.status()});
+ }
  if(req.method==='GET'&&u.pathname==='/api/transports'){
   const host=u.searchParams.get('director')||cfg.director;
   const url=new URL(host.includes('://')?host:'http://'+host);if(!['http:','https:'].includes(url.protocol)||url.username||url.password)throw Error('Invalid Director address');

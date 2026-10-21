@@ -6,3 +6,5 @@ runtime/
 node_modules/
 tests/test-state/
 *.zip
+tests/test-state-cloud/
+.DS_Store

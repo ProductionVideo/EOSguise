@@ -1,0 +1,66 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "shows": {
+      ".read": true,
+      ".indexOn": [
+        "updatedAt",
+        "name"
+      ],
+      "$showId": {
+        ".validate": "newData.hasChildren([\"schemaVersion\", \"name\", \"updatedAt\", \"sessionId\", \"sequence\", \"eosConnected\", \"disguiseConnected\"])",
+        "schemaVersion": {
+          ".validate": "newData.val() === 1"
+        },
+        "updatedAt": {
+          ".validate": "newData.isNumber() && newData.val() === now"
+        },
+        "name": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 120"
+        },
+        "sessionId": {
+          ".validate": "newData.isString() && newData.val().length <= 64"
+        },
+        "sequence": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() % 1 === 0"
+        },
+        "eosConnected": {
+          ".validate": "newData.isBoolean()"
+        },
+        "disguiseConnected": {
+          ".validate": "newData.isBoolean()"
+        },
+        "$other": {
+          ".validate": false
+        },
+        ".write": "$showId.matches(/^[a-f0-9]{64}$/)"
+      }
+    },
+    "showData": {
+      "$showId": {
+        ".validate": "newData.hasChildren([\"schemaVersion\", \"updatedAt\", \"stateJson\", \"cuesJson\", \"catalogueHash\"])",
+        "schemaVersion": {
+          ".validate": "newData.val() === 1"
+        },
+        "updatedAt": {
+          ".validate": "newData.isNumber() && newData.val() === now"
+        },
+        "stateJson": {
+          ".validate": "newData.isString() && newData.val().length <= 65536"
+        },
+        "cuesJson": {
+          ".validate": "newData.isString() && newData.val().length <= 4194304"
+        },
+        "catalogueHash": {
+          ".validate": "newData.isString() && newData.val().matches(/^[a-f0-9]{64}$/)"
+        },
+        "$other": {
+          ".validate": false
+        },
+        ".write": "$showId.matches(/^[a-f0-9]{64}$/)",
+        ".read": true
+      }
+    }
+  }
+}

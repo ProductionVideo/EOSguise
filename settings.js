@@ -25,3 +25,27 @@ async function refreshAddresses(repeat=true){try{
  });$('network-addresses').replaceChildren(...rows);
  }catch{$('network-status').textContent='Cannot reach EOSguise here. Use localhost or another shared network.';}finally{if(repeat)setTimeout(refreshAddresses,10000);}}
 refreshAddresses();
+const ago=ms=>{const s=Math.max(0,Math.round(ms/1000));return s<60?s+'s ago':s<3600?Math.round(s/60)+' min ago':Math.round(s/3600)+' h ago';};
+const publishStates={disabled:'Off',publishing:'Starting…',connected:'Connected to cloud',retrying:'Retrying',error:'Not publishing'};
+function cloudStatus(p){
+ const s=p.status,parts=[publishStates[s.state]||s.state];
+ if(s.lastSuccess)parts.push('last update '+ago(Date.now()-s.lastSuccess));
+ if(s.state==='retrying'&&s.retryAt)parts.push('next try in '+Math.max(0,Math.ceil((s.retryAt-Date.now())/1000))+'s');
+ if(s.error)parts.push(s.error);
+ if(s.state!=='disabled'&&s.cues)parts.push(s.cues+' cues');
+ $('publishStatus').textContent=parts.join(' · ');$('publishStatus').className='publish-'+s.state;
+ $('publishLink').hidden=!s.url;if(s.url){$('publishLink').href=s.url;$('publishLink').textContent=s.url;}
+}
+let cloudLoaded=false,cloudBusy=false;
+async function refreshCloud(){try{
+ const r=await fetch('/api/settings/cloud',{signal:AbortSignal.timeout(3000)});if(!r.ok)throw Error();const p=await r.json();
+ if(!cloudLoaded&&!cloudBusy){$('publishEnabled').checked=p.enabled;$('showName').value=p.showName;cloudLoaded=true;}
+ cloudStatus(p);
+ }catch{$('publishStatus').textContent='Cannot read publishing status';}finally{setTimeout(refreshCloud,2000);}}
+$('publishSave').onclick=async()=>{
+ cloudBusy=true;$('publishSave').disabled=true;$('publishResult').textContent='Saving…';
+ try{const r=await fetch('/api/settings/cloud',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled:$('publishEnabled').checked,showName:$('showName').value}),signal:AbortSignal.timeout(5000)}),p=await r.json();if(!r.ok)throw Error(p.error);$('showName').value=p.showName;$('publishResult').textContent='Saved';cloudStatus(p);}
+ catch(e){$('publishResult').textContent=e.message;}
+ finally{cloudBusy=false;$('publishSave').disabled=false;}
+};
+refreshCloud();

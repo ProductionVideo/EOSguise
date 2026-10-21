@@ -1,0 +1,68 @@
+{
+  "name": "projects/stagewiki-cues/sites/stagewiki-cues/customDomains/cues.stage.wiki",
+  "createTime": "2026-10-21T20:28:03.424490430Z",
+  "updateTime": "2026-10-21T20:28:03.424490520Z",
+  "etag": "W/\"1792614483\"",
+  "hostState": "HOST_ACTIVE",
+  "ownershipState": "OWNERSHIP_ACTIVE",
+  "requiredDnsUpdates": {
+    "discovered": [
+      {
+        "domainName": "cues.stage.wiki",
+        "records": [
+          {
+            "domainName": "cues.stage.wiki",
+            "type": "CNAME",
+            "rdata": "stagewiki-cues.web.app"
+          }
+        ]
+      }
+    ],
+    "desired": [
+      {
+        "domainName": "cues.stage.wiki",
+        "records": [
+          {
+            "domainName": "cues.stage.wiki",
+            "type": "CNAME",
+            "rdata": "stagewiki-cues.web.app"
+          }
+        ]
+      }
+    ],
+    "checkTime": "2026-10-21T20:34:04.532360693Z"
+  },
+  "certPreference": "GROUPED",
+  "cert": {
+    "type": "TEMPORARY",
+    "state": "CERT_VALIDATING",
+    "verification": {
+      "dns": {
+        "discovered": [
+          {
+            "domainName": "_acme-challenge.cues.stage.wiki"
+          }
+        ],
+        "desired": [
+          {
+            "domainName": "_acme-challenge.cues.stage.wiki",
+            "records": [
+              {
+                "domainName": "_acme-challenge.cues.stage.wiki",
+                "type": "TXT",
+                "rdata": "vrqD889pM6JhPw5EDD3zVO43EKEGthdxnXalOwcK-MQ",
+                "requiredAction": "ADD"
+              }
+            ]
+          }
+        ],
+        "checkTime": "2026-10-21T20:33:48.403449931Z"
+      },
+      "http": {
+        "path": "/.well-known/acme-challenge/B5CE4hPuvk4dvTC4Dw31o2yf079ugSKe93Pq1jtkppv8Mb5gHxEkq4YEw6cqvnwH",
+        "desired": "B5CE4hPuvk4dvTC4Dw31o2yf079ugSKe93Pq1jtkppv8Mb5gHxEkq4YEw6cqvnwH.M0-GObbb5ePi63ASQsPKBrDqfgayGnOWpyrEF0nHqug",
+        "lastCheckTime": "2026-10-21T20:33:48.403449931Z"
+      }
+    }
+  }
+}

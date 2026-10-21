@@ -1,0 +1,7 @@
+Work on ProductionVideo/EOSguise. Read CLAUDE-HANDOFF.md in the attached cues-scaffold package and implement the real public Cues dashboard plus the outbound-only runtime publisher.
+
+Firebase project stagewiki-cues, Hosting, Europe Realtime Database, database rules and Squarespace DNS are already set up. Preserve the real resource IDs. SETUP-STATUS.md records the custom-domain certificate state. The current website is only a holding page.
+
+Show setup must need only a show name and enable switch, with no per-show key or certificate. The public site lists shows, displays their current cues and cue lists, and lets visitors delete a cloud listing. New runtime activity restores a deleted show. Never expose or proxy show controls, settings or the local EOSguise server to the internet.
+
+Implement on a feature branch, run the existing mock regressions plus the acceptance checks in the handoff, and provide a reviewable PR. No real show hardware commands for testing.

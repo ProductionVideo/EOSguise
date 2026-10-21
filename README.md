@@ -32,6 +32,19 @@ Disguise feedback uses one shared Live Update subscription connection, with reco
 
 The first start copies config.example.json to config.json. Your settings are stored in config.json and excluded from Git. Stale pages cannot send commands after a settings change until they refresh their state. Commands are logged in web-eos-actions.jsonl and web-disguise-actions.jsonl. Process diagnostics are in server.log and error.log. Start.cmd is idempotent and Run.ps1 restarts the backend after an unexpected exit.
 
+## Public status website (optional)
+
+EOSguise can publish read-only status to https://cues.stage.wiki so a phone or another computer can follow the show from anywhere. It is off by default.
+
+1. In Settings > Public status website, tick **Publish status online**, enter a show name and press **Save publishing**. Nothing else is needed: no account, key, certificate, port forwarding or pairing.
+2. The status line shows Off, Starting, Connected to cloud or Retrying, the last successful update and any error. The link opens the show's page.
+
+What is published: the show name, connection state, the configured cue lists' names, current and next cue (number, label, notes), the cue catalogue (numbers, labels, fade times), and the selected Disguise transport's name, track, section, cue, playmode, engaged, output and timing. Nothing else: no addresses, hostnames, Director URL, transport UID, config, logs or diagnostics. EOSguise only sends outbound HTTPS updates; the website cannot send commands, change settings or reach this computer.
+
+The show name is the only identifier and is not a secret. Anyone who knows it can view the show, and anyone can delete the listing from the website (the next update from a running EOSguise restores it within about 10 seconds; turn publishing off to remove it for good). Use a distinct name: two machines using the same name overwrite each other. Changing the name publishes a new listing; delete the old one from the website.
+
+Updates are coalesced to at most one per second, with a heartbeat every 10 seconds and backoff when the cloud is unreachable. Cloud problems never affect local pages, controls or hardware connections. The website and its deployment are in cloud/; see cloud/README.md.
+
 ## Validation
 
 Mock integration checks cover selected transport targeting, point cues, alternate cue lists, settings persistence, stale command rejection, idle heartbeat, reconnect, subscription cleanup and preserved navigation playmode. Real-show checks were read-only; no cues, transport changes or fades were triggered for testing.
@@ -47,3 +60,6 @@ Third-party notices are in runtime/LICENSE and vendor/ws/LICENSE.
 With Node 22+, run `node tests/test-network.mjs`, `node tests/test-sharing.mjs`, and `node tests/test-eosguise.mjs`. These tests use local mock endpoints; no real show hardware is contacted.
 
 Cue regressions: `node test-active-cue.mjs`, `node test-cue-status.mjs`, `node test-cue-catalogue.mjs`, `node test-cue-reconnect.mjs`, `node test-cue-follow.mjs`, `node test-eos-picker.mjs`, and `node test-eos-picker-api.mjs`.
+
+Public status: `node tests/test-cloud-identity.mjs`, `node tests/test-cloud-telemetry.mjs`, `node tests/test-cloud-publisher.mjs`, `node tests/test-cloud-settings.mjs` and `node tests/test-cloud-site.mjs` use mocks only. The end-to-end rules and dashboard test needs the Firebase emulator; see cloud/README.md.
+

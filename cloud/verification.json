@@ -1,0 +1,77 @@
+{
+  "checkedAt": "2026-10-21T20:30:43.958Z",
+  "results": [
+    {
+      "check": "Root is not publicly readable",
+      "passed": true
+    },
+    {
+      "check": "Show summaries are publicly readable",
+      "passed": true
+    },
+    {
+      "check": "Unauthenticated full publish succeeds",
+      "passed": true
+    },
+    {
+      "check": "Server timestamp resolves",
+      "passed": true
+    },
+    {
+      "check": "Public detail read succeeds",
+      "passed": true
+    },
+    {
+      "check": "Unknown control field is rejected",
+      "passed": true
+    },
+    {
+      "check": "Control path is rejected",
+      "passed": true
+    },
+    {
+      "check": "Invalid show ID is rejected",
+      "passed": true
+    },
+    {
+      "check": "Forged timestamp is rejected",
+      "passed": true
+    },
+    {
+      "check": "Oversized state is rejected",
+      "passed": true
+    },
+    {
+      "check": "Heartbeat without catalogue succeeds on existing show",
+      "passed": true
+    },
+    {
+      "check": "Atomic delete succeeds",
+      "passed": true
+    },
+    {
+      "check": "Deleted summary is absent",
+      "passed": true
+    },
+    {
+      "check": "Incomplete heartbeat cannot recreate missing detail",
+      "passed": true
+    },
+    {
+      "check": "Activity can recreate a deleted show",
+      "passed": true
+    },
+    {
+      "check": "Hosting responds with holding page",
+      "passed": true
+    },
+    {
+      "check": "Hosting sends CSP",
+      "passed": true
+    },
+    {
+      "check": "Disposable verification data removed",
+      "passed": true
+    }
+  ]
+}
