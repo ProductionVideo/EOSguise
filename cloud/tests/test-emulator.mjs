@@ -75,7 +75,9 @@ try{
   const page=await browser.page();
   await page.goto(site+'/');
   await until(()=>page.evaluate(`document.querySelectorAll('.show-row').length===2`),'directory rows');
-  assert.equal(await page.text('#connection'),'Live','Connection banner reads Live (visually hidden)');
+  assert.equal(await page.text('#connection'),'Live','Connection banner reads Live');
+  assert.equal(await page.evaluate(`getComputedStyle(document.querySelector('#connection')).display`),'none','Banner removed from the page while live');
+  assert.equal(await page.evaluate(`[...document.body.children].some(e=>['fixed','sticky'].includes(getComputedStyle(e).position))`),false,'Nothing pinned to the top of the page (iOS Safari toolbar tint)');
   const names=await page.evaluate(`[...document.querySelectorAll('.show-name')].map(e=>e.textContent).sort()`);
   assert.deepEqual(names,['<img src=x onerror="window.__xss=1"> Panto','Hamlet'],'Hostile names render as text');
   // Directory search
@@ -156,13 +158,13 @@ try{
 
   // Failed delete keeps the listing and offers retry (database refuses: emulate offline network for the request).
   await page.offline(true);
-  await until(()=>page.evaluate(`document.querySelector('#connection').textContent!=='Live'`),'browser disconnection shown');
+  await until(()=>page.evaluate(`document.querySelector('#connection').textContent!=='Live'&&getComputedStyle(document.querySelector('#connection')).display!=='none'`),'browser disconnection banner shown');
   await page.evaluate(`document.querySelector('#delete').click()`);
   await until(()=>page.evaluate(`document.querySelector('#delete').textContent==='Retry delete'&&document.querySelector('#delete-status').textContent.startsWith('Could not delete')`),'failed delete');
   assert.ok(await page.evaluate(`document.querySelector('.card .muted')?.textContent.includes('Timing frozen')`),'Timing frozen while browser disconnected');
   assert.ok((await rest('GET','shows/'+idLate)).json,'Listing kept after failed delete');
   await page.offline(false);
-  await until(()=>page.evaluate(`document.querySelector('#connection').textContent==='Live'`),'reconnected',20000);
+  await until(()=>page.evaluate(`document.querySelector('#connection').textContent==='Live'&&getComputedStyle(document.querySelector('#connection')).display==='none'`),'reconnected and banner removed',20000);
   late.publisher.stop();
 
   // Stale, offline and invalid records (written with emulator owner access to fake old timestamps / bad JSON).
