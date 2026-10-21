@@ -1,4 +1,4 @@
-// Outbound-only status publisher for the public Cues website (https://cues.stage.wiki).
+// Outbound-only status publisher for the public cuedo website (https://cues.stage.wiki).
 // It sends PATCH requests to the Firebase Realtime Database REST API and never reads instructions back:
 // response bodies are discarded and only the HTTP status is used.
 import {createHash,randomUUID} from 'node:crypto';
@@ -7,7 +7,7 @@ import {stateSignature,telemetryCues} from './cloud-telemetry.mjs';
 
 export const CLOUD_DATABASE_URL='https://stagewiki-cues-default-rtdb.europe-west1.firebasedatabase.app';
 export const CLOUD_SITE_URL='https://cues.stage.wiki';
-export const LIMITS={state:65536,cues:4194304};
+export const LIMITS={state:16384,cues:1048576};
 const TIMESTAMP={'.sv':'timestamp'};
 const sha256=text=>createHash('sha256').update(text,'utf8').digest('hex');
 

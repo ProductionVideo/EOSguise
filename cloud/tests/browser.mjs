@@ -1,4 +1,4 @@
-// Minimal headless Chrome driver over the DevTools protocol, using EOSguise's vendored ws.
+// Minimal headless Chrome driver over the DevTools protocol, using cuedo's vendored ws.
 import {spawn} from 'node:child_process';import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
 import WebSocket from '../../vendor/ws/wrapper.mjs';
 

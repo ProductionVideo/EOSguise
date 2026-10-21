@@ -47,10 +47,10 @@
           ".validate": "newData.isNumber() && newData.val() === now"
         },
         "stateJson": {
-          ".validate": "newData.isString() && newData.val().length <= 65536"
+          ".validate": "newData.isString() && newData.val().length <= 16384"
         },
         "cuesJson": {
-          ".validate": "newData.isString() && newData.val().length <= 4194304"
+          ".validate": "newData.isString() && newData.val().length <= 1048576"
         },
         "catalogueHash": {
           ".validate": "newData.isString() && newData.val().matches(/^[a-f0-9]{64}$/)"

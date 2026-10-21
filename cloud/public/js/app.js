@@ -1,4 +1,4 @@
-// Cues dashboard: read-only status published by EOSguise, plus one-click Delete of a cloud listing.
+// cuedo dashboard: read-only status published by the cuedo runtime, plus one-click Delete of a cloud listing.
 // All published values are rendered as text (textContent / text nodes). Nothing here can control a show.
 import {isShowId,showIdFor} from './identity.js';
 import * as M from './model.js';
@@ -52,6 +52,7 @@ function buildDirectory(){
  const sort=h('select',{'aria-label':'Sort shows',onchange:e=>{app.sort=e.target.value;prefs.set('sort',app.sort);renderDirectory();}},h('option',{value:'recent'},'Recently updated'),h('option',{value:'name'},'Name'));
  sort.value=app.sort;
  const view=h('section',{class:'directory','aria-labelledby':'shows-title'},
+  h('div',{class:'hero'},$('#plaque').content.cloneNode(true),h('p',{},'Live cues from shows running cuedo.')),
   h('div',{class:'section-head'},h('h1',{id:'shows-title'},'Shows'),h('span',{id:'show-count',class:'muted'})),
   h('div',{class:'filters'},search,sort),h('div',{id:'notice',role:'status'}),h('ul',{id:'shows',class:'show-list'}));
  $('#view').replaceChildren(view);
@@ -62,7 +63,7 @@ function renderDirectory(){
  $('#show-count').textContent=app.showsState==='ready'?app.shows.size+(app.shows.size===1?' show':' shows'):'';
  let notice='';
  if(app.showsState==='loading')notice=app.showsError?'Cannot load shows right now. Retrying automatically.':'Loading shows…';
- else if(!app.shows.size)notice='No shows are publishing right now. Turn on “Publish status online” in EOSguise Settings to add one.';
+ else if(!app.shows.size)notice='No shows are publishing right now. Turn on “Publish status online” in cuedo Settings to add one.';
  else if(!rows.length)notice='No shows match your search.';
  if(app.routeMissing)notice='That page does not exist. Showing all shows. '+notice;
  $('#notice').textContent=notice;
@@ -71,7 +72,7 @@ function renderDirectory(){
   return h('li',{},h('a',{href:'/show/'+s.id,'data-nav':true,class:'show-row '+state},
    h('span',{class:'show-name'},s.name),
    h('span',{class:'show-meta'},'Updated '+M.ageText(now-s.updatedAt)),
-   h('span',{class:'badges'},badge('Publisher',FRESHNESS[state]),sourceBadge('Eos',s.eosConnected,fresh),sourceBadge('Disguise',s.disguiseConnected,fresh),nameMatches(s)?null:badge('Name',['Name does not match link','bad'],'This listing was not written by EOSguise with this name'))));
+   h('span',{class:'badges'},badge('Publisher',FRESHNESS[state]),sourceBadge('Eos',s.eosConnected,fresh),sourceBadge('Disguise',s.disguiseConnected,fresh),nameMatches(s)?null:badge('Name',['Name does not match link','bad'],'This listing was not written by cuedo with this name'))));
  }));
 }
 
@@ -96,7 +97,7 @@ async function deleteShow(d){
   const r=await fetch(app.db.restURL(''),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({['shows/'+d.id]:null,['showData/'+d.id]:null}),signal:AbortSignal.timeout(10000)});
   r.body?.cancel().catch(()=>{});
   if(!r.ok)throw Error(r.status===401||r.status===403?'the database refused the request':'HTTP '+r.status);
-  d.deleteMessage='Deleted. If EOSguise is still publishing this show, it will reappear within about 10 seconds.';
+  d.deleteMessage='Deleted. If cuedo is still publishing this show, it will reappear within about 10 seconds.';
  }catch(e){d.deleteError='Could not delete: '+(e.name==='TimeoutError'?'the request timed out':e.message==='Failed to fetch'?'no connection':e.message)+'. The listing is unchanged.';}
  finally{d.deleting=false;render();}
 }
@@ -116,7 +117,7 @@ function buildDetail(){
    h('div',{id:'catalogue-lists',class:'catalogue-lists'})),
   h('section',{class:'danger','aria-labelledby':'delete-title'},
    h('h2',{id:'delete-title'},'Remove from this website'),
-   h('p',{},'Deletes this listing and its cue list from cues.stage.wiki for everyone. It does not affect the show. If EOSguise is still publishing, the show reappears within about 10 seconds with its full cue list. To stop publishing, turn it off in EOSguise Settings.'),
+   h('p',{},'Deletes this listing and its cue list from cues.stage.wiki for everyone. It does not affect the show. If cuedo is still publishing, the show reappears within about 10 seconds with its full cue list. To stop publishing, turn it off in cuedo Settings.'),
    h('div',{class:'delete-row'},h('button',{type:'button',id:'delete',onclick:()=>deleteShow(d)},'Delete listing'),h('span',{id:'delete-status',role:'status'}))));
  $('#view').replaceChildren(view);
 }
@@ -133,7 +134,7 @@ function renderDetail(){
  const updatedAt=Math.max(summary?.updatedAt??-Infinity,d.updatedAt??-Infinity),age=now-updatedAt;
  const state=M.freshness(Number.isFinite(updatedAt)?updatedAt:NaN,now),fresh=state==='fresh',live=fresh&&browserLive();
  const name=summary?.name||(d.missing?'Show not publishing':d.loaded?'Unnamed show':'Loading show…');
- $('#detail-name').textContent=name;document.title=(summary?summary.name+' · ':'')+'Cues · Stage Wiki';
+ $('#detail-name').textContent=name;document.title=(summary?summary.name+' · ':'')+'cuedo';
  const s=d.state&&!d.state.error?d.state:null;
  $('#detail-badges').replaceChildren(...(d.missing||!d.loaded?[]:[
   badge('Publisher',FRESHNESS[state]),h('span',{class:'muted'},'Updated '+M.ageText(age)),
@@ -144,7 +145,7 @@ function renderDetail(){
  else if(d.missing)notice='This show is not publishing right now: it was deleted, renamed or never existed. This page updates automatically if it starts publishing again.';
  else if(state==='offline')notice='This show has not published for over 2 minutes. Everything below is the last known status, not live.';
  else if(state==='stale')notice='Updates from this show have paused. Everything below is the last known status.';
- else if(!browserLive())notice='This browser is not connected to Cues. Everything below may be out of date.';
+ else if(!browserLive())notice='This browser is not connected to cuedo. Everything below may be out of date.';
  $('#detail-notice').textContent=notice;$('#detail-notice').className=notice?'notice':'';
  const del=$('#delete');del.disabled=d.deleting||d.missing||!d.loaded;del.textContent=d.deleting?'Deleting…':'Delete listing';
  const ds=$('#delete-status');ds.textContent=d.deleteError||d.deleteMessage;ds.className=d.deleteError?'error':'';
@@ -206,7 +207,7 @@ function render(){
 function route(){
  const m=location.pathname.match(/^\/show\/([^/]+)\/?$/);
  if(m&&isShowId(m[1])){app.view='detail';app.routeMissing=false;openDetail(m[1]);}
- else{closeDetail();app.routeMissing=location.pathname!=='/';app.view='directory';document.title='Cues · Stage Wiki';buildDirectory();}
+ else{closeDetail();app.routeMissing=location.pathname!=='/';app.view='directory';document.title='cuedo';buildDirectory();}
  render();
 }
 document.addEventListener('click',e=>{
@@ -220,7 +221,7 @@ window.addEventListener('offline',()=>{app.online=false;render();});
 
 async function start(){
  try{app.db=connect(await(await fetch('/firebase-config.json',{cache:'no-store'})).json());}
- catch{$('#view').replaceChildren(h('p',{class:'notice'},'Cues could not start. Check your connection and reload.'));return;}
+ catch{$('#view').replaceChildren(h('p',{class:'notice'},'cuedo could not start. Check your connection and reload.'));return;}
  // Browser-to-Firebase connection and server clock offset come from the SDK; ages advance on a 1 s timer.
  app.db.listen('.info/connected',v=>{app.connection=v?'open':app.connection==='open'?'reconnecting':'connecting';render();});
  app.db.listen('.info/serverTimeOffset',v=>{if(Number.isFinite(v))app.offset=v;});

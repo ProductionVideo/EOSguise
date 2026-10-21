@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="18 12 604 210" role="img" aria-labelledby="title desc"><title id="title">cuedo</title><desc id="desc">Monochrome cuedo wordmark inside a rounded plaque with a magnifying glass.</desc><path d="M112 70H240C259 40 288 24 320 24S381 40 400 70H528C576 70 610 99 610 140S576 210 528 210H112C64 210 30 181 30 140S64 70 112 70Z" fill="none" stroke="currentColor" stroke-width="8" stroke-linejoin="round"/><g fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="butt" stroke-linejoin="round">
+<path d="M147 126 A32 32 0 1 0 147 172"/>
+<path d="M184 117 V149 A32 32 0 0 0 248 149 V117 M248 149 V181"/>
+<path d="M282 149 H346 A32 32 0 1 0 338.5 169.6"/>
+<circle cx="412" cy="149" r="32"/><path d="M444 93 V181"/>
+<circle cx="510" cy="149" r="32"/>
+</g><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="320" cy="61" r="27" stroke-width="7"/><path d="M346 72L383 85" stroke-width="12"/><path d="M309 54C309 46 315 43 321 43M307 65V61M317 71V56C317 51 324 50 326 55V66M325 75V70" stroke-width="3.5"/></g></svg>

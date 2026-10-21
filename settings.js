@@ -23,7 +23,7 @@ async function refreshAddresses(repeat=true){try{
   for(const a of group){const link=document.createElement(a.url&&a.shared&&!a.error?'a':'span');link.textContent=a.url||a.address+' ('+a.note+')';if(link.tagName==='A')link.href=a.url;row.append(link);if(a.error&&a.shared){const error=document.createElement('span');error.textContent=a.error;row.append(error);}}
   return row;
  });$('network-addresses').replaceChildren(...rows);
- }catch{$('network-status').textContent='Cannot reach EOSguise here. Use localhost or another shared network.';}finally{if(repeat)setTimeout(refreshAddresses,10000);}}
+ }catch{$('network-status').textContent='Cannot reach cuedo here. Use localhost or another shared network.';}finally{if(repeat)setTimeout(refreshAddresses,10000);}}
 refreshAddresses();
 const ago=ms=>{const s=Math.max(0,Math.round(ms/1000));return s<60?s+'s ago':s<3600?Math.round(s/60)+' min ago':Math.round(s/3600)+' h ago';};
 const publishStates={disabled:'Off',publishing:'Starting…',connected:'Connected to cloud',retrying:'Retrying',error:'Not publishing'};

@@ -15,7 +15,7 @@ try{
  }));});eos.listen(0,'127.0.0.1');await once(eos,'listening');
  const spare=net.createServer().listen(0,'127.0.0.1');await once(spare,'listening');const port=spare.address().port;await new Promise(r=>spare.close(r));
  const cfg={director:'http://127.0.0.1:'+director.address().port,eosHost:'127.0.0.1',eosPort:eos.address().port,cueLists:[1,2],controlList:2,transportUid:'111',transportName:'show',revision:1,port,lanAddress:'',additionalAddresses:[]};const config=new URL('config.json',dir);fs.writeFileSync(config,JSON.stringify(cfg));
- const base='http://127.0.0.1:'+port;let logs='';helper=spawn(process.execPath,[fileURLToPath(new URL('../server.mjs',import.meta.url))],{env:{...process.env,EOSGUISE_CONFIG:fileURLToPath(config)},windowsHide:true});helper.stderr.on('data',b=>logs+=b);helper.stdout.on('data',()=>{});
+ const base='http://127.0.0.1:'+port;let logs='';helper=spawn(process.execPath,[fileURLToPath(new URL('../server.mjs',import.meta.url))],{env:{...process.env,CUEDO_CONFIG:fileURLToPath(config)},windowsHide:true});helper.stderr.on('data',b=>logs+=b);helper.stdout.on('data',()=>{});
  async function state(){return (await fetch(base+'/api/state')).json();}async function until(fn){for(let i=0;i<100;i++){try{if(await fn())return;}catch{}await wait(100);}throw Error('Timed out: '+logs);}
  await until(async()=>{const s=await state();return s.disguise.connected&&s.eos.connected;});
  assert.equal((await state()).disguise.transportUid,'111');await wait(7000);assert.equal((await state()).disguise.connected,true,'Idle connection remains live');assert.ok(Date.now()-(await state()).disguise.updated<4000);assert.equal(subscriptions.length,1);

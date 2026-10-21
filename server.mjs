@@ -8,11 +8,13 @@ import {createDirectorHandler} from './web-disguise.mjs';
 import {createCueHandler} from './web-eos.mjs';
 import {createPublisher} from './cloud-publisher.mjs';import {telemetryState} from './cloud-telemetry.mjs';
 import http from 'node:http';import net from 'node:net';import fs from 'node:fs';import {message,slip,parser} from './osc.mjs';
-const configFile=process.env.EOSGUISE_CONFIG?pathToFileURL(process.env.EOSGUISE_CONFIG):new URL('./config.json',import.meta.url);
+// CUEDO_CONFIG overrides the config path; EOSGUISE_CONFIG is still honoured from before the rename.
+const configPath=process.env.CUEDO_CONFIG||process.env.EOSGUISE_CONFIG;
+const configFile=configPath?pathToFileURL(configPath):new URL('./config.json',import.meta.url);
 if(!fs.existsSync(configFile))fs.copyFileSync(new URL('./config.example.json',import.meta.url),configFile);
 const cfg=JSON.parse(fs.readFileSync(configFile));
 cfg.cueLists ||= [1,2];cfg.controlList ||= 2;cfg.revision ||= 1;cfg.publishEnabled=cfg.publishEnabled===true;cfg.showName=typeof cfg.showName==='string'?cfg.showName:'';
-const state={app:'eosguise',eos:{connected:false,lastReceived:0,lists:{1:{name:'Cue list 1',current:null,next:null},2:{name:'Cue list 2',current:null,next:null}},loaded:0,total:0},disguise:{connected:false}};
+const state={app:'cuedo',eos:{connected:false,lastReceived:0,lists:{1:{name:'Cue list 1',current:null,next:null},2:{name:'Cue list 2',current:null,next:null}},loaded:0,total:0},disguise:{connected:false}};
 let reconnectTimer;
 let catalogueSource=null;
 function prepareCatalogue(){
@@ -31,13 +33,13 @@ function connect(){const gen=++generation;clearTimeout(reconnectTimer);socket?.d
  else if((m=a.match(/^\/eos\/out\/get\/cue\/([0-9]+)\/([^/]+)\/(\d+)\/list\/0\/\d+$/))){const key=`${m[1]}/${m[2]}/${m[3]}`;catalogue.add({list:Number(m[1]),number:m[2],part:Number(m[3]),name:String(v[2]||''),up:Number(v[3]),down:Number(v[5])},v[0]);received.add(m[1]+'/'+v[0]);state.eos.loaded=received.size;}
  else if((m=a.match(/^\/eos\/out\/notify\/cue\/([0-9]+)\/list\//))){const path='/eos/get/cue/'+m[1]+'/count';if(!queue.includes(path))queue.push(path);}
  }));socket.on('error',e=>{if(gen===generation)state.eos.error=e.message;});socket.on('close',()=>{if(gen===generation){state.eos.connected=false;reconnectTimer=setTimeout(connect,3000);}});}
-connect();setInterval(()=>{if(!state.eos.connected)return;if(queue.length)send(queue.shift());if(Date.now()-lastPing>5000){lastPing=Date.now();send('/eos/ping',['eosguise']);}if(Date.now()-state.eos.lastReceived>15000)socket.destroy();},40);
+connect();setInterval(()=>{if(!state.eos.connected)return;if(queue.length)send(queue.shift());if(Date.now()-lastPing>5000){lastPing=Date.now();send('/eos/ping',['cuedo']);}if(Date.now()-state.eos.lastReceived>15000)socket.destroy();},40);
 let live=createLive(cfg,s=>{state.disguise=s;});
-// Public status publishing is opt-in and outbound only. EOSGUISE_CLOUD_DATABASE_URL is for local tests.
-const publisher=createPublisher({getState:()=>telemetryState(state,cfg.cueLists),getCatalogue:()=>({version:catalogue.version,values:catalogue.values()}),...(process.env.EOSGUISE_CLOUD_DATABASE_URL?{databaseURL:process.env.EOSGUISE_CLOUD_DATABASE_URL}:{})});
+// Public status publishing is opt-in and outbound only. CUEDO_CLOUD_DATABASE_URL is for local tests.
+const publisher=createPublisher({getState:()=>telemetryState(state,cfg.cueLists),getCatalogue:()=>({version:catalogue.version,values:catalogue.values()}),...(process.env.CUEDO_CLOUD_DATABASE_URL?{databaseURL:process.env.CUEDO_CLOUD_DATABASE_URL}:{})});
 publisher.configure({enabled:cfg.publishEnabled,showName:cfg.showName});
 let handleCue=createCueHandler(cfg,undefined,(list,cue)=>catalogue.lookup(list,cue)); let handleDirector=createDirectorHandler(cfg,()=>state.disguise);
-const assets={'/settings':['settings.html','text/html'],'/settings.js':['settings.js','text/javascript'],'/settings.css':['settings.css','text/css'],'/disguise':['disguise.html','text/html'],'/disguise.js':['disguise.js','text/javascript'],'/disguise.css':['disguise.css','text/css'],'/eos':['eos.html','text/html'],'/eos.js':['eos.js','text/javascript'],'/eos.css':['eos.css','text/css'],'/':['index.html','text/html'],'/app.js':['app.js','text/javascript'],'/style.css':['style.css','text/css']};
+const assets={'/favicon.svg':['favicon.svg','image/svg+xml'],'/settings':['settings.html','text/html'],'/settings.js':['settings.js','text/javascript'],'/settings.css':['settings.css','text/css'],'/disguise':['disguise.html','text/html'],'/disguise.js':['disguise.js','text/javascript'],'/disguise.css':['disguise.css','text/css'],'/eos':['eos.html','text/html'],'/eos.js':['eos.js','text/javascript'],'/eos.css':['eos.css','text/css'],'/':['index.html','text/html'],'/app.js':['app.js','text/javascript'],'/style.css':['style.css','text/css']};
 function handler(req,res){res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Content-Security-Policy',"default-src 'self'; style-src 'self'; script-src 'self'; frame-ancestors 'self'");if(new URL(req.url,'http://localhost').pathname==='/api/disguise/command'){handleDirector(req,res).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}if(new URL(req.url,'http://localhost').pathname==='/api/eos/goto'){handleCue(req,res).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}if(new URL(req.url,'http://localhost').pathname.startsWith('/api/settings')||new URL(req.url,'http://localhost').pathname==='/api/transports'){settingsRoute(req,res).catch(e=>{if(!res.headersSent)res.writeHead(400,{'Content-Type':'application/json'});res.end(JSON.stringify({error:e.message}));});return;}if(req.method!=='GET'){res.writeHead(405);return res.end('Read only');}const u=new URL(req.url,'http://localhost');if(u.pathname==='/api/state'){res.setHeader('Content-Type','application/json');return res.end(JSON.stringify({...state,settings:{revision:cfg.revision,cueLists:cfg.cueLists,controlList:cfg.controlList,transportName:cfg.transportName},now:Date.now()}));}if(u.pathname==='/api/cues'){res.setHeader('Content-Type','application/json');return res.end(JSON.stringify([...catalogue.values()].filter(c=>c.part===0).sort((a,b)=>a.list-b.list||Number(a.number)-Number(b.number))));}const asset=assets[u.pathname];if(!asset){res.writeHead(404);return res.end('Not found');}res.setHeader('Content-Type',asset[1]+'; charset=utf-8');res.end(fs.readFileSync(new URL('./'+asset[0],import.meta.url)));}
 const listeners=createListeners(cfg,handler);
 async function settingsRoute(req,res){

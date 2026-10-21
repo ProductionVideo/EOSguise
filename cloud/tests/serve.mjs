@@ -2,7 +2,7 @@
 // firebase-config.json that points at the local database emulator. Never used in production.
 import http from 'node:http';import fs from 'node:fs';import path from 'node:path';
 const root=new URL('../public/',import.meta.url),hosting=JSON.parse(fs.readFileSync(new URL('../firebase.json',import.meta.url))).hosting;
-const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json'};
+const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.svg':'image/svg+xml'};
 export function serve({port=0,databaseOrigin='http://127.0.0.1:9000'}={}){
  const headers=hosting.headers[0].headers.map(({key,value})=>[key,key==='Content-Security-Policy'?value.replace('connect-src ','connect-src '+databaseOrigin+' '+databaseOrigin.replace('http','ws')+' '):value]);
  const server=http.createServer((req,res)=>{

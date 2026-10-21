@@ -24,7 +24,7 @@ assert.equal(M.liveSeconds(10,{playmode:'HoldSection',ageMs:4000,live:true}),10,
 assert.equal(M.fadeText(5000,3000),'5 / 3');assert.equal(M.fadeText(90000,90000),'1:30');assert.equal(M.fadeText(null,null),'');
 assert.deepEqual(M.sortShows([{id:'2',name:'b',updatedAt:1},{id:'1',name:'a',updatedAt:2},{id:'3',name:'c',updatedAt:null}],'recent').map(s=>s.id),['1','2','3']);
 assert.deepEqual(M.filterShows([{name:'Hamlet'},{name:'Panto'}],' ham').map(s=>s.name),['Hamlet']);
-// The hosted site has no route to local EOSguise controls, settings or runtime code, and renders data only as text.
+// The hosted site has no route to local cuedo controls, settings or runtime code, and renders data only as text.
 const site=new URL('../cloud/public/',import.meta.url),files=[];
 const walk=d=>{for(const e of fs.readdirSync(d,{withFileTypes:true}))e.isDirectory()?walk(path.join(d,e.name)):files.push(path.join(d,e.name));};walk(site.pathname);
 const sources=files.map(f=>[path.relative(site.pathname,f),fs.readFileSync(f,'utf8')]);
@@ -34,7 +34,7 @@ for(const [file,text] of sources){
  assert.ok(!/from\s+['"]\.\.\//.test(text),file+' imports only website modules');
  for(const m of text.matchAll(/https:\/\/www\.gstatic\.com\/[^'"]+/g))assert.match(m[0],/^https:\/\/www\.gstatic\.com\/firebasejs\/\d+\.\d+\.\d+\/firebase-(app|database)\.js$/,'Pinned Firebase SDK only');
 }
-assert.deepEqual(sources.map(([f])=>f).sort(),['firebase-config.json','index.html','js/app.js','js/data.js','js/identity.js','js/model.js','style.css']);
+assert.deepEqual(sources.map(([f])=>f).sort(),['favicon.svg','firebase-config.json','index.html','js/app.js','js/data.js','js/identity.js','js/model.js','style.css']);
 const hosting=JSON.parse(fs.readFileSync(new URL('../cloud/firebase.json',import.meta.url))).hosting;
 const csp=hosting.headers[0].headers.find(h=>h.key==='Content-Security-Policy').value;
 assert.match(csp,/script-src 'self' https:\/\/www\.gstatic\.com;/);assert.match(csp,/style-src 'self';/);assert.ok(!csp.includes('unsafe'));

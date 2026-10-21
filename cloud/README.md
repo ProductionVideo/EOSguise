@@ -1,9 +1,9 @@
-# Cues website (cues.stage.wiki)
+# cuedo website (cues.stage.wiki)
 
-Public, read-only dashboard for status published by EOSguise, plus the Firebase configuration it is deployed with. The infrastructure brief is in `CLAUDE-HANDOFF.md`; provisioning state is in `SETUP-STATUS.md` and `verification.json`.
+Public, read-only dashboard for status published by cuedo, plus the Firebase configuration it is deployed with. The infrastructure brief is in `CLAUDE-HANDOFF.md`; provisioning state is in `SETUP-STATUS.md` and `verification.json`.
 
 ```
-Eos + Disguise <-> EOSguise runtime on the show LAN
+Eos + Disguise <-> cuedo runtime on the show LAN
                        |  outbound HTTPS PATCH (cloud-publisher.mjs)
                        v
              Firebase Realtime Database (stagewiki-cues, europe-west1)
@@ -35,7 +35,7 @@ The contract is unchanged from the handoff:
 - **Heartbeat:** the summary plus `showData/{id}/updatedAt` and `stateJson` only.
 - **Delete:** one atomic root PATCH setting both records to null.
 
-Publisher behaviour (EOSguise):
+Publisher behaviour (cuedo):
 - **Rate:** state changes are coalesced to at most one request a second, with a heartbeat every 10 seconds. Track timers ride along with heartbeats rather than triggering their own updates.
 - **Requests:** one request in flight at a time, a 5-second timeout, and backoff with jitter capped at 60 seconds.
 - **After a Delete:** a rejected heartbeat is retried once as a full snapshot, so the next activity restores the show with its complete catalogue.
@@ -52,10 +52,10 @@ The SDK replaced REST streaming because the database serves HTTP/1.1. A browser 
 
 ## Security model and limits
 
-- **No ownership:** the show name is the only identifier. Anyone can read a show whose name or link they know, overwrite it by publishing the same name, or delete it. This is by design (no accounts or keys) and is stated in EOSguise Settings.
+- **No ownership:** the show name is the only identifier. Anyone can read a show whose name or link they know, overwrite it by publishing the same name, or delete it. This is by design (no accounts or keys) and is stated in cuedo Settings.
 - **Spoofed names:** anyone can write a record by hand, so a listing's name might not match its ID. The dashboard checks that each name hashes to its ID and marks mismatches "Name does not match link".
 - **Quota abuse:** the rules bound record sizes but cannot rate-limit writes. Someone could fill the Spark plan's storage or download quota by writing many large records, or delete every listing repeatedly. Firebase disables the database on Spark when a quota runs out, which affects the website only; shows keep running locally. If abuse happens, the usual options are Firebase App Check or authenticated publishing. Both need design work and possibly the Blaze plan.
-- **One-way boundary:** nothing on the website can reach EOSguise. There is no command path, the rules deny everything outside `/shows` and `/showData`, and EOSguise ignores responses apart from the hash check.
+- **One-way boundary:** nothing on the website can reach cuedo. There is no command path, the rules deny everything outside `/shows` and `/showData`, and cuedo ignores responses apart from the hash check.
 
 ## Test
 
@@ -87,4 +87,4 @@ firebase deploy --only hosting --project stagewiki-cues            # website onl
 firebase deploy --only database --project stagewiki-cues           # rules only (unchanged from the deployed v1)
 ```
 
-The show machine needs no Firebase CLI, login, key or certificate. EOSguise uses the public REST endpoint built into `cloud-publisher.mjs`. The `EOSGUISE_CLOUD_DATABASE_URL` environment variable exists only to point tests at a mock or emulator.
+The show machine needs no Firebase CLI, login, key or certificate. cuedo uses the public REST endpoint built into `cloud-publisher.mjs`. The `CUEDO_CLOUD_DATABASE_URL` environment variable exists only to point tests at a mock or emulator.

@@ -1,4 +1,4 @@
-// Show identity shared by the EOSguise runtime and the Cues website.
+// Show identity shared by the cuedo runtime and the cuedo website.
 // cloud/public/js/identity.js must stay byte-identical (tests/test-cloud-identity.mjs checks).
 export const MAX_NAME_LENGTH=120;
 // NFKC, trim and collapse whitespace. Returns null when empty or too long.

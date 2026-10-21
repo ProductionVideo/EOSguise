@@ -43,8 +43,10 @@ try{
  await denied({['shows/'+id]:summary('Rules Show',{updatedAt:1})},'Forged timestamp');
  await denied({['shows/'+id]:summary('x'.repeat(121))},'Name too long');
  await denied({['shows/'+id]:{name:'x',updatedAt:TS}},'Missing fields');
- await denied({['showData/'+id+'/stateJson']:'x'.repeat(65537),['showData/'+id+'/updatedAt']:TS},'Oversized state');
+ await denied({['showData/'+id+'/stateJson']:'x'.repeat(16385),['showData/'+id+'/updatedAt']:TS},'Oversized state');
  await denied({['showData/'+id+'/catalogueHash']:'nothex'},'Bad hash');
+ await denied({['showData/'+id+'/cuesJson']:'x'.repeat(1048577),['showData/'+id+'/updatedAt']:TS},'Oversized catalogue');
+ assert.equal((await rest('PATCH','',{['showData/'+id+'/cuesJson']:'x'.repeat(1048576),['showData/'+id+'/updatedAt']:TS})).status,200,'Catalogue at the limit is accepted');
  await denied({shows:null},'Ancestor delete');
  assert.equal((await rest('PATCH','',{['shows/'+id]:null,['showData/'+id]:null})).status,200,'Public atomic delete');
  await denied({['shows/'+id]:summary('Rules Show'),['showData/'+id+'/updatedAt']:TS,['showData/'+id+'/stateJson']:'{}'},'Heartbeat cannot recreate missing detail');

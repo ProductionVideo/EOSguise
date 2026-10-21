@@ -110,8 +110,8 @@ const ids=r=>[...new Set(Object.keys(r.body).map(k=>k.split('/')[1]))];
  pa.stop();pb.stop();pc.stop();}
 
 // Oversized catalogue: clear local error, nothing silently dropped, no full publish attempted.
-{const cloud=fakeCloud(),s=show();const huge='x'.repeat(500);
- s.catalogue={version:9,values:Array.from({length:Math.ceil(LIMITS.cues/500)+10},(_,i)=>({list:1,number:String(i+1),part:0,name:huge,up:0,down:0}))};
+{const cloud=fakeCloud(),s=show();const huge='x'.repeat(200);
+ s.catalogue={version:9,values:Array.from({length:Math.ceil(LIMITS.cues/200)+10},(_,i)=>({list:1,number:String(i+1),part:0,name:huge,up:0,down:0}))};
  const p=createPublisher(s.options(cloud));await p.configure({enabled:true,showName:'Huge'});await wait(100);
  assert.equal(cloud.requests.length,0);assert.equal(p.status().state,'error');assert.match(p.status().error,/too large to publish \(\d+ cues\)/);p.stop();}
 

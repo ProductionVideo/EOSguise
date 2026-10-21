@@ -18,4 +18,4 @@ Use the working default Hosting URL during provisioning. Recheck the custom doma
 
 ## Coding status
 
-Implemented on the EOSguise branch `feature/cloud-publisher`: the runtime publisher, the Settings section and the real dashboard in `public/`. All of it was tested against the database emulator with the deployed rules. The dashboard has **not** been deployed; the holding page is still live until the pull request is reviewed. See README.md for tests and deployment.
+Implemented on the repository branch `feature/cloud-publisher`: the runtime publisher, the Settings section and the real dashboard in `public/`. All of it was tested against the database emulator with the deployed rules. The dashboard has **not** been deployed; the holding page is still live until the pull request is reviewed. See README.md for tests and deployment.

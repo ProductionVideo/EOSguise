@@ -1,4 +1,4 @@
-// Runs the real server with an existing (pre-cloud) config, offline Director and a mock cloud endpoint.
+// Runs the real server with an existing (pre-cloud) config, set through the pre-rename EOSGUISE_CONFIG variable, offline Director and a mock cloud endpoint.
 import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';import fs from 'node:fs';import http from 'node:http';import net from 'node:net';import {spawn} from 'node:child_process';import {once} from 'node:events';
 import {showIdFor} from '../cloud-identity.mjs';
@@ -16,7 +16,7 @@ try{
  const original={director:'http://127.0.0.1:'+directorPort,eosHost:'127.0.0.1',eosPort:eos.address().port,cueLists:[1,2],controlList:2,transportUid:'98765432109876543210',transportName:'show',revision:4,port};
  const config=new URL('config.json',dir);fs.writeFileSync(config,JSON.stringify(original));
  const base='http://127.0.0.1:'+port;let logs='';
- helper=spawn(process.execPath,[fileURLToPath(new URL('../server.mjs',import.meta.url))],{env:{...process.env,EOSGUISE_CONFIG:fileURLToPath(config),EOSGUISE_CLOUD_DATABASE_URL:'http://127.0.0.1:'+cloud.address().port},windowsHide:true});
+ helper=spawn(process.execPath,[fileURLToPath(new URL('../server.mjs',import.meta.url))],{env:{...process.env,EOSGUISE_CONFIG:fileURLToPath(config),CUEDO_CLOUD_DATABASE_URL:'http://127.0.0.1:'+cloud.address().port},windowsHide:true});
  helper.stderr.on('data',b=>logs+=b);helper.stdout.on('data',()=>{});
  const until=async(fn,ms=8000)=>{const end=Date.now()+ms;while(Date.now()<end){try{if(await fn())return;}catch{}await wait(50);}throw Error('Timed out: '+logs);};
  const post=(path,body,headers={origin:base,'content-type':'application/json'})=>fetch(base+path,{method:'POST',headers,body:JSON.stringify(body),signal:AbortSignal.timeout(3000)});

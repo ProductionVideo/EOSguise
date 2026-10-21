@@ -1,6 +1,6 @@
 $ErrorActionPreference='Stop'
 $hash=[BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes($PSScriptRoot))).Replace('-','').Substring(0,16)
-$mutex=New-Object Threading.Mutex($false, ('Local\EOSguise-'+$hash))
+$mutex=New-Object Threading.Mutex($false, ('Local\cuedo-'+$hash))
 $owned=$false
 try {
  try{$owned=$mutex.WaitOne(0)}catch [Threading.AbandonedMutexException]{$owned=$true}
