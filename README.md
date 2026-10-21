@@ -11,7 +11,7 @@ Show utility for Eos cue feedback/control and Disguise transport feedback/contro
    - **Windows:** double-click **install-windows.cmd**. If SmartScreen warns about a downloaded file, choose **More info > Run anyway**.
    - **macOS:** double-click **install-mac.command**. The first time, macOS may block it as being from an unidentified developer: right-click it, choose **Open**, then **Open** again.
    - **Linux:** run `./install-linux.sh` (or `bash install-linux.sh`).
-3. The installer copies cuedo to your user folder, sets it to start when you log in, starts it and opens http://127.0.0.1:28336/ in your browser. The downloaded folder can then be deleted.
+3. The installer copies cuedo to your user folder, sets it to start when you log in, starts it and opens http://127.0.0.1:13579/ in your browser. The downloaded folder can then be deleted.
 4. In Settings, set the Director address, refresh transports and choose one. Set Eos host, OSC TCP port, two displayed cue lists and the list to control. Save.
 
 | | Installed in | Starts at login with |
@@ -22,7 +22,7 @@ Show utility for Eos cue feedback/control and Disguise transport feedback/contro
 
 The installer downloads a private, checksum-verified Node.js v22.23.1 from nodejs.org. For a show machine without internet, put the matching file in a `runtime` folder beside the installer before running it: `node.exe` from https://nodejs.org/dist/v22.23.1/win-x64/ on Windows, or `node-v22.23.1-<darwin|linux>-<arm64|x64>.tar.gz` from https://nodejs.org/dist/v22.23.1/ on macOS and Linux.
 
-Run the installer again to update; settings are kept. Installing over EOSguise stops the old copy, removes its Startup shortcut and carries its settings over. The web port is **28336** ("CUEDO" on a phone keypad). Installs still on the old default 38304 move to 28336; if another application uses the port, the installer picks the next free one and says so. To use a different port, edit `config.json` in the install folder and run the installer again.
+Run the installer again to update; settings are kept. Installing over EOSguise stops the old copy, removes its Startup shortcut and carries its settings over. The web port is **13579** (the odd digits in order). Installs still on the old default 38304 move to 13579; if another application uses the port, the installer picks the next free one and says so. To use a different port, edit `config.json` in the install folder and run the installer again.
 
 To stop cuedo from starting at login, run `scripts/uninstall-windows.cmd` (Windows) or `scripts/uninstall.sh` (macOS, Linux) in the install folder; delete the folder to remove it completely. Logs are `server.log` and `error.log` in the install folder.
 
@@ -32,7 +32,7 @@ On macOS 15 and later, allow **Local Network** access for `node` if macOS asks (
 
 - Eos must accept OSC 1.1 / SLIP TCP and allow OSC control. Enter the enabled console port. The default is 3032; use the port enabled in your console configuration.
 - Designer must expose the Session HTTP API and Live Update WebSocket. Feedback was verified read-only with r32.4.18. Disguise control uses HTTP API commands, not an OSC device. No periodic Python execute requests.
-- cuedo shares on all network adapters by default. In Settings, untick Share beside an adapter to close its IPv4 and IPv6 listeners. Changes apply immediately and persist across restarts. Localhost is always available. Settings lists current laptop addresses with adapter names, refreshing every 10 seconds. New interfaces work without restarting. The web port is 28336. Network reachability still depends on routing and the system firewall. IPv6 link-local addresses are shown as text because browsers cannot reliably use scoped URLs.
+- cuedo shares on all network adapters by default. In Settings, untick Share beside an adapter to close its IPv4 and IPv6 listeners. Changes apply immediately and persist across restarts. Localhost is always available. Settings lists current laptop addresses with adapter names, refreshing every 10 seconds. New interfaces work without restarting. The web port is 13579. Network reachability still depends on routing and the system firewall. IPv6 link-local addresses are shown as text because browsers cannot reliably use scoped URLs.
 - Network clients can use the controls and settings. Use only on your trusted show network; this version has no login.
 
 ## Operation

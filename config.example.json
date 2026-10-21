@@ -8,7 +8,7 @@
     1,
     2
   ],
-  "port": 28336,
+  "port": 13579,
   "transportName": "show",
   "director": "http://127.0.0.1",
   "publishEnabled": false,

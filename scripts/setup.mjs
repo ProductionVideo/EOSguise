@@ -6,7 +6,7 @@
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import net from 'node:net';
 import {execFileSync,spawn,spawnSync} from 'node:child_process';import {fileURLToPath} from 'node:url';
 
-export const DEFAULT_PORT=28336;       // "CUEDO" on a phone keypad; IANA-unassigned and below every OS's ephemeral range.
+export const DEFAULT_PORT=13579;       // Odd digits in order. IANA-unassigned and below every OS's ephemeral range.
 export const OLD_DEFAULT_PORT=38304;   // EOSguise default, migrated on install.
 const LABEL='wiki.stage.cuedo';
 const appDir=path.resolve(fileURLToPath(new URL('..',import.meta.url)));

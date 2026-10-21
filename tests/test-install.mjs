@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';import fs from 'node:fs';import os from 
 import {prepareConfig,portFree,DEFAULT_PORT,OLD_DEFAULT_PORT} from '../scripts/setup.mjs';
 const temp=()=>{const d=fs.mkdtempSync(path.join(os.tmpdir(),'cuedo-install-'));fs.copyFileSync(new URL('../config.example.json',import.meta.url),path.join(d,'config.example.json'));return d;};
 const read=d=>JSON.parse(fs.readFileSync(path.join(d,'config.json'),'utf8'));
-assert.equal(DEFAULT_PORT,28336);assert.equal(JSON.parse(fs.readFileSync(new URL('../config.example.json',import.meta.url))).port,DEFAULT_PORT,'Example config uses the default port');
+assert.equal(DEFAULT_PORT,13579);assert.equal(JSON.parse(fs.readFileSync(new URL('../config.example.json',import.meta.url))).port,DEFAULT_PORT,'Example config uses the default port');
 // Fresh install: config created from the example with publishing off.
 {const d=temp();const cfg=await prepareConfig(d,{free:async()=>true});assert.equal(cfg.port,DEFAULT_PORT);assert.equal(read(d).publishEnabled,false);}
 // Upgrade: the old EOSguise default port moves to the new default; everything else is kept.
