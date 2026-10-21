@@ -85,7 +85,8 @@ dd{margin:2px 0 0;font-size:16px;font-variant-numeric:tabular-nums;white-space:n
 .tabs button{flex:1;min-width:0;display:flex;justify-content:center;gap:6px;padding:8px;border:0;border-radius:9px;background:transparent;color:var(--muted);font:inherit;font-size:14px;cursor:pointer;white-space:nowrap}
 .tabs button.active{background:var(--panel-2);color:var(--text)}
 .tab-name{overflow:hidden;text-overflow:ellipsis}
-.table-wrap{max-height:55vh;max-height:55dvh;overflow:auto;border:1px solid var(--line);border-radius:12px;-webkit-overflow-scrolling:touch}
+/* position:relative keeps visually-hidden row labels inside the scroll box; otherwise they extend the page height. */
+.table-wrap{position:relative;max-height:55vh;max-height:55dvh;overflow:auto;border:1px solid var(--line);border-radius:12px;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-size:15px;table-layout:fixed}
 th{position:sticky;top:0;background:var(--panel-2);color:var(--muted);text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 10px;font-weight:600}
 td{padding:9px 10px;border-top:1px solid #213139}
@@ -124,7 +125,8 @@ button#delete:disabled{opacity:.5;cursor:default}
  .detail-top,#detail-name,#detail-badges,#detail-notice{grid-column:1/-1}
  #detail-name{font-size:30px}
  .badges.centered{margin-bottom:22px}
- #live{grid-column:1;grid-row:5;position:sticky;top:20px;margin:0}
+ /* Not sticky: a pinned status column let the Delete box slide underneath it and padded the page. */
+ #live{grid-column:1;grid-row:5;margin:0}
  .danger{grid-column:1;grid-row:6;margin-top:12px}
  .catalogue{grid-column:2;grid-row:5/span 2;margin:0}
  .cue-number{font-size:30px}
