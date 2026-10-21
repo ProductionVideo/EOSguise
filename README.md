@@ -2,22 +2,37 @@
 
 Formerly EOSguise.
 
-Standalone Windows utility for Eos cue feedback/control and Disguise transport feedback/control.
+Show utility for Eos cue feedback/control and Disguise transport feedback/control, for Windows, macOS and Linux.
 
-## Run
+## Install
 
-1. Download **Code > Download ZIP** from this repository and extract it to a permanent writable folder.
-2. Run **Setup-Runtime.cmd** once to download a checksum-verified Node runtime from nodejs.org. Then run **Start.cmd**, followed by **Open.cmd**. Settings: http://127.0.0.1:38304/settings.
-3. Set the Director address, refresh transports and choose one. Set Eos host, OSC TCP port, two displayed cue lists and the list to control. Save.
-4. Optional: Install-Startup.cmd starts cuedo at Windows login. Stop.cmd stops both the app and its supervisor. Remove cuedo.lnk from shell:startup to disable automatic startup. Running Install-Startup.cmd again replaces an EOSguise.lnk shortcut from before the rename.
+1. Download **Code > Download ZIP** from this repository and extract it anywhere (for example Downloads).
+2. Run the installer for your system:
+   - **Windows:** double-click **install-windows.cmd**. If SmartScreen warns about a downloaded file, choose **More info > Run anyway**.
+   - **macOS:** double-click **install-mac.command**. The first time, macOS may block it as being from an unidentified developer: right-click it, choose **Open**, then **Open** again.
+   - **Linux:** run `./install-linux.sh` (or `bash install-linux.sh`).
+3. The installer copies cuedo to your user folder, sets it to start when you log in, starts it and opens http://127.0.0.1:13579/ in your browser. The downloaded folder can then be deleted.
+4. In Settings, set the Director address, refresh transports and choose one. Set Eos host, OSC TCP port, two displayed cue lists and the list to control. Save.
 
-Windows x64 with Windows PowerShell 5.1 is required. Setup-Runtime.cmd installs a private Node v22.23.1 runtime. ws 8.22.0 is included with its licence. An existing Node 22+ installation on PATH can also be used. No Companion, Codex, npm installation or running chat is required. Keep runtime and vendor beside server.mjs. For another operating system, Node 22+ can run server.mjs directly; Windows launchers will not apply.
+| | Installed in | Starts at login with |
+|---|---|---|
+| Windows | `%LOCALAPPDATA%\cuedo` | Startup shortcut `cuedo` (with a supervisor that restarts it) |
+| macOS | `~/Library/Application Support/cuedo` | LaunchAgent `wiki.stage.cuedo` (restarts it if it stops) |
+| Linux | `~/.local/share/cuedo` | systemd user service `cuedo` (restarts it), or a desktop autostart entry without systemd |
+
+The installer downloads a private, checksum-verified Node.js v22.23.1 from nodejs.org. For a show machine without internet, put the matching file in a `runtime` folder beside the installer before running it: `node.exe` from https://nodejs.org/dist/v22.23.1/win-x64/ on Windows, or `node-v22.23.1-<darwin|linux>-<arm64|x64>.tar.gz` from https://nodejs.org/dist/v22.23.1/ on macOS and Linux.
+
+Run the installer again to update; settings are kept. Installing over EOSguise stops the old copy, removes its Startup shortcut and carries its settings over. The web port is **13579** (the odd digits in order). Installs still on the old default 38304 move to 13579; if another application uses the port, the installer picks the next free one and says so. To use a different port, edit `config.json` in the install folder and run the installer again.
+
+To stop cuedo from starting at login, run `scripts/uninstall-windows.cmd` (Windows) or `scripts/uninstall.sh` (macOS, Linux) in the install folder; delete the folder to remove it completely. Logs are `server.log` and `error.log` in the install folder.
+
+On macOS 15 and later, allow **Local Network** access for `node` if macOS asks (System Settings > Privacy & Security > Local Network); cuedo needs it to reach Eos and the Director. ws 8.22.0 is included with its licence. No npm installation is required.
 
 ## Connections
 
 - Eos must accept OSC 1.1 / SLIP TCP and allow OSC control. Enter the enabled console port. The default is 3032; use the port enabled in your console configuration.
 - Designer must expose the Session HTTP API and Live Update WebSocket. Feedback was verified read-only with r32.4.18. Disguise control uses HTTP API commands, not an OSC device. No periodic Python execute requests.
-- cuedo shares on all network adapters by default. In Settings, untick Share beside an adapter to close its IPv4 and IPv6 listeners. Changes apply immediately and persist across restarts. Localhost is always available. Settings lists current laptop addresses with adapter names, refreshing every 10 seconds. New interfaces work without restarting. The web port is 38304; edit config.json and restart to change it. Network reachability still depends on routing and Windows Firewall. IPv6 link-local addresses are shown as text because browsers cannot reliably use scoped URLs.
+- cuedo shares on all network adapters by default. In Settings, untick Share beside an adapter to close its IPv4 and IPv6 listeners. Changes apply immediately and persist across restarts. Localhost is always available. Settings lists current laptop addresses with adapter names, refreshing every 10 seconds. New interfaces work without restarting. The web port is 13579. Network reachability still depends on routing and the system firewall. IPv6 link-local addresses are shown as text because browsers cannot reliably use scoped URLs.
 - Network clients can use the controls and settings. Use only on your trusted show network; this version has no login.
 
 ## Operation
@@ -32,7 +47,7 @@ Disguise controls and feedback follow the chosen transport. Fade up/down is Dire
 
 Disguise feedback uses one shared Live Update subscription connection, with reconnect and ping/pong health checks. Eos uses its OSC subscription/bank feedback. Browsers refresh the local cached state once a second. Cue catalogue queries run on connection and cue-change notifications.
 
-The first start copies config.example.json to config.json. Your settings are stored in config.json and excluded from Git. Stale pages cannot send commands after a settings change until they refresh their state. Commands are logged in web-eos-actions.jsonl and web-disguise-actions.jsonl. Process diagnostics are in server.log and error.log. Start.cmd is idempotent and Run.ps1 restarts the backend after an unexpected exit.
+The first start copies config.example.json to config.json. Your settings are stored in config.json and excluded from Git. Stale pages cannot send commands after a settings change until they refresh their state. Commands are logged in web-eos-actions.jsonl and web-disguise-actions.jsonl. Process diagnostics are in server.log and error.log. The login item restarts the server after an unexpected exit.
 
 ## Public status website (optional)
 
@@ -59,7 +74,7 @@ Third-party notices are in runtime/LICENSE and vendor/ws/LICENSE.
 
 ## Tests
 
-With Node 22+, run `node tests/test-network.mjs`, `node tests/test-sharing.mjs`, and `node tests/test-cuedo.mjs`. These tests use local mock endpoints; no real show hardware is contacted.
+With Node 22+, run `node tests/test-network.mjs`, `node tests/test-sharing.mjs`, and `node tests/test-cuedo.mjs`, `node tests/test-install.mjs`. These tests use local mock endpoints; no real show hardware is contacted.
 
 Cue regressions: `node test-active-cue.mjs`, `node test-cue-status.mjs`, `node test-cue-catalogue.mjs`, `node test-cue-reconnect.mjs`, `node test-cue-follow.mjs`, `node test-eos-picker.mjs`, and `node test-eos-picker-api.mjs`.
 
