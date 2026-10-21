@@ -228,9 +228,11 @@ function renderCatalogue(d,s){
 }
 
 // ---------- Shell ----------
+// The banner is removed while live, and the first connection gets a grace period so page loads do not flash it.
+const startedAt=Date.now(),CONNECT_GRACE_MS=3000;
 function render(){
- // Connection banner appears only when something is wrong.
  const [text,tone]=connectionText();const c=$('#connection');c.textContent=text;c.className='connection '+tone;
+ c.hidden=tone==='good'||(app.online&&app.connection==='connecting'&&Date.now()-startedAt<CONNECT_GRACE_MS);
  if(app.view==='directory')renderDirectory();else if(app.view==='detail')renderDetail();
 }
 function route(){
