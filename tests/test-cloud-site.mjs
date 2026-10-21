@@ -38,6 +38,8 @@ assert.deepEqual(sources.map(([f])=>f).sort(),['favicon.svg','firebase-config.js
 const hosting=JSON.parse(fs.readFileSync(new URL('../cloud/firebase.json',import.meta.url))).hosting;
 const csp=hosting.headers[0].headers.find(h=>h.key==='Content-Security-Policy').value;
 assert.match(csp,/script-src 'self' https:\/\/www\.gstatic\.com;/);assert.match(csp,/style-src 'self';/);assert.ok(!csp.includes('unsafe'));
+assert.deepEqual(Object.keys(JSON.parse(fs.readFileSync(new URL('../cloud/public/firebase-config.json',import.meta.url)))),['databaseURL'],'No API key or other identifiers in the public config');
+for(const [file,text] of sources)assert.ok(!/AIza[0-9A-Za-z_-]{20,}/.test(text),file+' contains no Google API key');
 const rules=JSON.parse(fs.readFileSync(new URL('../cloud/database.rules.json',import.meta.url))).rules;
 assert.equal(rules['.read'],false);assert.equal(rules['.write'],false);assert.deepEqual(Object.keys(rules).sort(),['.read','.write','showData','shows']);
 console.log('PASS: untrusted summary/state/catalogue parsing, freshness thresholds, frozen/capped timing, no local control paths or HTML sinks in the hosted site, CSP and locked root rules');
