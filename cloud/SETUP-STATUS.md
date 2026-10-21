@@ -18,4 +18,4 @@ Use the working default Hosting URL during provisioning. Recheck the custom doma
 
 ## Coding status
 
-Implemented on the repository branch `feature/cloud-publisher`: the runtime publisher, the Settings section and the real dashboard in `public/`. All of it was tested against the database emulator with the deployed rules. The dashboard has **not** been deployed; the holding page is still live until the pull request is reviewed. See README.md for tests and deployment.
+Merged to `main` and deployed on 21 October 2026: the runtime publisher, the Settings section, the cuedo dashboard (replacing the holding page) and the tightened rules (`stateJson` up to 16 KB, `cuesJson` up to 1 MB). After deployment, https://cues.stage.wiki served the dashboard over HTTPS, oversized writes were rejected, and the live site connected with no errors. See README.md for tests and deployment.
