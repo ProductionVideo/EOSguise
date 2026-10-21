@@ -103,3 +103,32 @@ button#delete:disabled{opacity:.5;cursor:default}
 #delete-status:empty{display:none}
 #delete-status.error{color:var(--bad)}
 .fine{margin:0;font-size:12px;line-height:1.45;color:var(--muted)}
+
+.tagline{display:none}
+.list-title{display:flex;gap:8px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;white-space:nowrap;overflow:hidden}
+.list-title span{color:var(--text);text-transform:none;letter-spacing:0;overflow:hidden;text-overflow:ellipsis}
+
+/* Desktop: wider column, show grid, and a two-column show page. Phones are unaffected. */
+@media (min-width:900px){
+ main{max-width:1180px;padding:28px 32px 40px}
+ .hero{flex-direction:column;align-items:center;gap:10px;padding:28px 0 32px}
+ .hero .plaque{width:280px}
+ .tagline{display:block;margin:0;font-size:15px;color:var(--muted)}
+ .directory .bar,.directory #notice{max-width:640px;margin-left:auto;margin-right:auto}
+ .directory .bar{margin-bottom:20px}
+ .show-list{grid-template-columns:repeat(auto-fit,minmax(320px,380px));justify-content:center;gap:12px}
+ .show-row{padding:16px 18px;gap:12px}
+ .show-name{font-size:18px}
+ .detail{display:grid;grid-template-columns:380px minmax(0,1fr);grid-template-rows:auto auto auto auto auto 1fr;column-gap:28px;align-items:start}
+ .detail-top,#detail-name,#detail-badges,#detail-notice{grid-column:1/-1}
+ #detail-name{font-size:30px}
+ .badges.centered{margin-bottom:22px}
+ #live{grid-column:1;grid-row:5;position:sticky;top:20px;margin:0}
+ .danger{grid-column:1;grid-row:6;margin-top:12px}
+ .catalogue{grid-column:2;grid-row:5/span 2;margin:0}
+ .cue-number{font-size:30px}
+ .table-wrap{max-height:calc(100dvh - 260px)}
+}
+@media (min-width:1200px){
+ #catalogue-lists{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:16px}
+}
