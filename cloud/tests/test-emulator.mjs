@@ -108,6 +108,13 @@ try{
   await page.evaluate(`(()=>{const i=document.querySelector('#cue-query');i.value='';i.dispatchEvent(new Event('input'));document.querySelector('#show-times').click();})()`);
   assert.equal(await page.evaluate(`document.querySelectorAll('th.time').length`),0,'Times hidden');
   await page.evaluate(`document.querySelector('#show-times').click()`);
+  // No phantom page height from content inside the cue table scroll box, and Delete never overlaps the status cards.
+  const layoutOK=p=>p.evaluate(`(()=>{const de=document.documentElement;window.scrollTo(0,de.scrollHeight);const live=document.querySelector('#live').getBoundingClientRect(),del=document.querySelector('.danger').getBoundingClientRect();
+   return de.scrollHeight<=Math.ceil(document.body.getBoundingClientRect().height)+1&&!(del.top<live.bottom&&del.bottom>live.top&&del.left<live.right&&del.right>live.left);})()`);
+  assert.ok(await layoutOK(page),'Desktop: page height matches content and Delete stays clear of the status cards');
+  {const short=await browser.page({width:1000,height:620});await short.goto(site+'/show/'+idA);await until(()=>short.evaluate(`document.querySelectorAll('tbody tr').length>=41`),'short desktop render');
+   assert.ok(await short.evaluate(`document.querySelector('tr.current').offsetTop>document.querySelector('.table-wrap').clientHeight`),'Current cue is below the fold of its table');
+   assert.ok(await layoutOK(short),'Short desktop window: same');short.close();}
   // Wide screens show both lists side by side without the switcher.
   assert.equal(await page.evaluate(`document.querySelectorAll('#catalogue-lists table').length`),2,'Both lists on desktop');
   assert.equal(await page.evaluate(`document.querySelector('#list-tabs').hidden`),true);
@@ -118,6 +125,7 @@ try{
    await until(()=>phone.evaluate(`document.querySelector('#list-tabs button.active')?.textContent.startsWith('List 2')&&document.querySelectorAll('tbody tr').length===0`),'switch to list 2');
    await phone.evaluate(`document.querySelectorAll('#list-tabs button')[0].click()`);
    await until(()=>phone.evaluate(`document.querySelectorAll('tbody tr').length>=41`),'back to list 1');
+   assert.ok(await phone.evaluate(`document.documentElement.scrollHeight<=Math.ceil(document.body.getBoundingClientRect().height)+1`),'Phone: page height matches content');
    assert.deepEqual(phone.errors,[]);phone.close();}
   // Phone width: nothing scrolls sideways and long names stay on one line.
   {const phone=await browser.page({width:390,height:844});
