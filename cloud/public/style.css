@@ -86,6 +86,7 @@ dd{margin:2px 0 0;font-size:16px;font-variant-numeric:tabular-nums;white-space:n
 .tabs button{flex:1;min-width:0;display:flex;justify-content:center;gap:6px;padding:8px;border:0;border-radius:9px;background:transparent;color:var(--muted);font:inherit;font-size:14px;cursor:pointer;white-space:nowrap}
 .tabs button.active{background:var(--panel-2);color:var(--text)}
 .tab-letter{font-weight:700}
+.tab-number{color:var(--muted)}
 .tab-name{overflow:hidden;text-overflow:ellipsis}
 /* position:relative keeps visually-hidden row labels inside the scroll box; otherwise they extend the page height. */
 .table-wrap{position:relative;max-height:55vh;max-height:55dvh;overflow:auto;border:1px solid var(--line);border-radius:12px;-webkit-overflow-scrolling:touch}

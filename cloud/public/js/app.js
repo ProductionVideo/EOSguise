@@ -20,6 +20,8 @@ function h(tag,props={},...children){
 const hidden=text=>h('span',{class:'visually-hidden'},text);
 // The two displayed cue lists are A and B (configured order); the Eos list number is shown beside them.
 const letter=(lists,n)=>lists.indexOf(n)===1?'B':'A';
+// Shown as "List A 7 Main"; placeholder names that only repeat the number are hidden.
+const cleanName=(name,n)=>{const t=String(name||'').trim();return !t||t===String(n)||/^cue ?list \d+$/i.test(t)?'':t;};
 const prefs={get(key,fallback){try{const v=localStorage.getItem('cues-'+key);return v===null?fallback:JSON.parse(v);}catch{return fallback;}},set(key,value){try{localStorage.setItem('cues-'+key,JSON.stringify(value));}catch{}}};
 
 const app={db:null,offset:0,shows:new Map(),showsState:'loading',connection:'connecting',online:navigator.onLine,verified:new Map(),detail:null,view:null,query:'',sort:prefs.get('sort','recent')};
@@ -172,7 +174,7 @@ function renderDetail(){
  if(d.state?.error)cards.push(h('div',{class:'card error'},d.state.error));
  else if(s){
   for(const n of s.eos.cueLists){const l=s.eos.lists[n];
-   cards.push(h('div',{class:'card'+(fresh&&s.eos.connected?'':' dim')},h('div',{class:'card-head'},h('span',{},'EOS · '+letter(s.eos.cueLists,n)+' · LIST '+n),h('span',{class:'head-name',title:l.name||null},l.name)),cueLine('current',l.current,d,n),cueLine('next',l.next,d,n)));}
+   cards.push(h('div',{class:'card'+(fresh&&s.eos.connected?'':' dim')},h('div',{class:'card-head'},h('span',{},'EOS · LIST '+letter(s.eos.cueLists,n)+' '+n),h('span',{class:'head-name',title:cleanName(l.name,n)||null},cleanName(l.name,n))),cueLine('current',l.current,d,n),cueLine('next',l.next,d,n)));}
   if(!s.eos.cueLists.length)cards.push(h('div',{class:'card dim'},'No Eos cue lists configured.'));
   const g=s.disguise,timing=v=>M.clock(M.liveSeconds(v,{playmode:g.playmode,ageMs:age,live}));
   const where=[g.track||'No track',g.section!==null?'Section '+g.section+(g.sectionName?' · '+g.sectionName:''):''].filter(Boolean).join(' · ');
@@ -190,13 +192,13 @@ function renderCatalogue(d,s){
  const q=$('#cue-query').value.trim().toLowerCase(),showTimes=$('#show-times').checked;
  const lists=s?s.eos.cueLists:[...new Set((d.cues?.rows||[]).map(c=>c.list))].slice(0,2);
  if(!lists.includes(d.list))d.list=lists[0]??null;
- const n=d.list,listName=k=>s?.eos.lists[k]?.name||'';
+ const n=d.list,listName=k=>cleanName(s?.eos.lists[k]?.name,k);
  // List switcher (one table at a time keeps the page short on a phone).
  const tabsKey=JSON.stringify([lists,lists.map(listName),n]);
  if(tabsKey!==d.tabsKey){
   d.tabsKey=tabsKey;
   $('#list-tabs').replaceChildren(...lists.map(k=>h('button',{type:'button',role:'tab','aria-selected':String(k===n),class:k===n?'active':null,onclick:()=>{d.list=k;d.tableKey=null;d.followed=null;render();}},
-   h('span',{class:'tab-letter'},letter(lists,k)),h('span',{class:'tab-name'},listName(k)||'List '+k))));
+   h('span',{class:'tab-letter'},'List '+letter(lists,k)),h('span',{class:'tab-number'},String(k)),listName(k)?h('span',{class:'tab-name'},listName(k)):null)));
   $('#list-tabs').hidden=lists.length<2||wide.matches;
  }
  const shown=wide.matches?lists:n===null?[]:[n];
@@ -214,7 +216,7 @@ function renderCatalogue(d,s){
     const isCurrent=current(k)!==null&&Number(c.number)===Number(current(k)),isNext=!isCurrent&&next(k)!==null&&Number(c.number)===Number(next(k));
     return h('tr',{class:isCurrent?'current':isNext?'next':null},h('td',{},c.number),h('td',{class:'name',title:c.name||null},c.name||'(Unlabelled)',isCurrent?hidden(' (current)'):isNext?hidden(' (next)'):null),showTimes?h('td',{class:'time'},M.fadeText(c.up,c.down)):null);
    }));
-   return h('div',{class:'cue-column'},wide.matches?h('h3',{class:'list-title'},letter(lists,k)+' · List '+k,listName(k)?h('span',{},listName(k)):null):null,
+   return h('div',{class:'cue-column'},wide.matches?h('h3',{class:'list-title'},'List '+letter(lists,k)+' '+k,listName(k)?h('span',{},listName(k)):null):null,
     h('div',{class:'table-wrap'},h('table',{},h('thead',{},h('tr',{},h('th',{},'Cue'),h('th',{},'Name'),showTimes?h('th',{class:'time'},'Time'):null)),body)),
     rows.length?null:h('p',{class:'count'},q?'No matching cues':'No cues'));
   }));

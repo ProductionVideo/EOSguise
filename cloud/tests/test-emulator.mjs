@@ -100,7 +100,7 @@ try{
   await until(()=>page.evaluate(`document.querySelector('.cue-number')?.textContent==='12.5'&&document.querySelectorAll('tbody tr').length>=41`),'detail render');
   assert.equal(await page.evaluate(`document.querySelector('.cue-fade').textContent`),'Time 1:30 / 5','Fade shown with hidden label');
   assert.equal(await page.evaluate(`document.querySelector('tr.current td').textContent`),'12.5');
-  assert.deepEqual(await page.evaluate(`[...document.querySelectorAll('.card-head span:first-child')].map(e=>e.textContent)`),['EOS · A · LIST 1','EOS · B · LIST 2','DISGUISE'],'Cue lists labelled A and B with the Eos list number');
+  assert.deepEqual(await page.evaluate(`[...document.querySelectorAll('.card-head span:first-child')].map(e=>e.textContent)`),['EOS · LIST A 1','EOS · LIST B 2','DISGUISE'],'Cue lists labelled List A / List B with the Eos list number once');
   assert.deepEqual(await page.evaluate(`[...document.querySelectorAll('.pills span.good')].map(e=>e.textContent)`),['Engaged','Faded up'],'Engaged and Faded up shown as positive');
   a.state={...a.state,eos:{...a.state.eos,lists:{...a.state.eos.lists,1:{name:'Main',current:{number:'13',name:'Night',notes:''},next:{number:'14',name:'Dawn',notes:''}}}}};
   await until(()=>page.evaluate(`document.querySelector('.cue-number')?.textContent==='13'&&document.querySelector('tr.current td')?.textContent==='13'`),'detail live update');
@@ -124,7 +124,7 @@ try{
   {const phone=await browser.page({width:390,height:844});await phone.goto(site+'/show/'+idA);
    await until(()=>phone.evaluate(`document.querySelectorAll('#list-tabs button').length===2&&document.querySelectorAll('#catalogue-lists table').length===1`),'phone switcher');
    await phone.evaluate(`document.querySelectorAll('#list-tabs button')[1].click()`);
-   await until(()=>phone.evaluate(`document.querySelector('#list-tabs button.active')?.textContent.startsWith('B')&&document.querySelectorAll('tbody tr').length===0`),'switch to list 2');
+   await until(()=>phone.evaluate(`document.querySelector('#list-tabs button.active')?.textContent.startsWith('List B')&&document.querySelectorAll('tbody tr').length===0`),'switch to list 2');
    await phone.evaluate(`document.querySelectorAll('#list-tabs button')[0].click()`);
    await until(()=>phone.evaluate(`document.querySelectorAll('tbody tr').length>=41`),'back to list 1');
    assert.ok(await phone.evaluate(`document.documentElement.scrollHeight<=Math.ceil(document.body.getBoundingClientRect().height)+1`),'Phone: page height matches content');
