@@ -73,6 +73,7 @@ select{flex:none;width:auto;padding-right:8px}
 .track{font-size:16px;font-weight:600}
 .pills{display:flex;gap:6px;overflow:hidden}
 .pills span{font-size:12px;padding:3px 8px;border-radius:6px;background:var(--panel-2);white-space:nowrap}
+.pills span.good{background:#193e30;color:var(--good)}
 .card dl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0}
 dt{font-size:11px;color:var(--muted)}
 dd{margin:2px 0 0;font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -84,6 +85,7 @@ dd{margin:2px 0 0;font-size:16px;font-variant-numeric:tabular-nums;white-space:n
 .tabs[hidden]{display:none}
 .tabs button{flex:1;min-width:0;display:flex;justify-content:center;gap:6px;padding:8px;border:0;border-radius:9px;background:transparent;color:var(--muted);font:inherit;font-size:14px;cursor:pointer;white-space:nowrap}
 .tabs button.active{background:var(--panel-2);color:var(--text)}
+.tab-letter{font-weight:700}
 .tab-name{overflow:hidden;text-overflow:ellipsis}
 /* position:relative keeps visually-hidden row labels inside the scroll box; otherwise they extend the page height. */
 .table-wrap{position:relative;max-height:55vh;max-height:55dvh;overflow:auto;border:1px solid var(--line);border-radius:12px;-webkit-overflow-scrolling:touch}

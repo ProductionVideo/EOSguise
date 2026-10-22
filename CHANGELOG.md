@@ -1,6 +1,9 @@
 # Changelog
 
 ## 0.1.3
+- Cue lists are labelled A and B everywhere, with the Eos list number beside them.
+- Engaged and Faded up are shown as positive (green) feedback locally and on the website.
+- Settings > Updates: check for and install the latest version from main of github.com/ProductionVideo/cuedo; settings are kept and cuedo restarts.
 
 - One-click installers for Windows, macOS and Linux (install-windows.cmd, install-mac.command, install-linux.sh): install to a per-user folder with a checksum-verified Node runtime, start at login (Startup shortcut, LaunchAgent or systemd user service), start and open in the browser. Replaces Setup-Runtime, Start, Stop, Open and Install-Startup scripts. Default web port is now 13579; installs on 38304 are migrated.
 - Renamed EOSguise to cuedo, with the cuedo wordmark and icon. Existing installs keep their config; Start.cmd recognises a running pre-rename instance and Install-Startup.cmd replaces the old shortcut.

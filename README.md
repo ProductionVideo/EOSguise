@@ -32,6 +32,8 @@ The installer downloads a private, checksum-verified Node.js v22.23.1 from nodej
 
 Run the installer again to update; settings are kept. Installing over EOSguise stops the old copy, removes its Startup shortcut and carries its settings over. The web port is **13579** (the odd digits in order). Installs still on the old default 38304 move to 13579; if another application uses the port, the installer picks the next free one and says so. To use a different port, edit `config.json` in the install folder and run the installer again.
 
+To update, use **Settings > Updates**: it checks the main branch on GitHub, installs the latest version, keeps your settings and restarts cuedo (controls are unavailable for a few seconds, so not during a show). Running the installer again also updates.
+
 To stop cuedo from starting at login, run `scripts/uninstall-windows.cmd` (Windows) or `scripts/uninstall.sh` (macOS, Linux) in the install folder; delete the folder to remove it completely. Logs are `server.log` and `error.log` in the install folder.
 
 On macOS 15 and later, allow **Local Network** access for `node` if macOS asks (System Settings > Privacy & Security > Local Network); cuedo needs it to reach Eos and the Director. ws 8.22.0 is included with its licence. No npm installation is required.
@@ -82,7 +84,7 @@ Third-party notices are in runtime/LICENSE and vendor/ws/LICENSE.
 
 ## Tests
 
-With Node 22+, run `node tests/test-network.mjs`, `node tests/test-sharing.mjs`, and `node tests/test-cuedo.mjs`, `node tests/test-install.mjs`. These tests use local mock endpoints; no real show hardware is contacted.
+With Node 22+, run `node tests/test-network.mjs`, `node tests/test-sharing.mjs`, and `node tests/test-cuedo.mjs`, `node tests/test-install.mjs`, `node tests/test-updater.mjs`. These tests use local mock endpoints; no real show hardware is contacted.
 
 Cue regressions: `node test-active-cue.mjs`, `node test-cue-status.mjs`, `node test-cue-catalogue.mjs`, `node test-cue-reconnect.mjs`, `node test-cue-follow.mjs`, `node test-eos-picker.mjs`, and `node test-eos-picker-api.mjs`.
 

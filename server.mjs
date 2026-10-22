@@ -6,7 +6,7 @@ import {createLive,discover} from './disguise-live.mjs';
 import {validateSettings,validateCloudSettings,saveSettings} from './settings.mjs';
 import {createDirectorHandler} from './web-disguise.mjs';
 import {createCueHandler} from './web-eos.mjs';
-import {createPublisher} from './cloud-publisher.mjs';import {telemetryState} from './cloud-telemetry.mjs';
+import {createPublisher} from './cloud-publisher.mjs';import {createUpdater,restartProcess} from './updater.mjs';import {fileURLToPath} from 'node:url';import {telemetryState} from './cloud-telemetry.mjs';
 import http from 'node:http';import net from 'node:net';import fs from 'node:fs';import {message,slip,parser} from './osc.mjs';
 // CUEDO_CONFIG overrides the config path; EOSGUISE_CONFIG is still honoured from before the rename.
 const configPath=process.env.CUEDO_CONFIG||process.env.EOSGUISE_CONFIG;
@@ -38,9 +38,12 @@ let live=createLive(cfg,s=>{state.disguise=s;});
 // Public status publishing is opt-in and outbound only. CUEDO_CLOUD_DATABASE_URL is for local tests.
 const publisher=createPublisher({getState:()=>telemetryState(state,cfg.cueLists),getCatalogue:()=>({version:catalogue.version,values:catalogue.values()}),...(process.env.CUEDO_CLOUD_DATABASE_URL?{databaseURL:process.env.CUEDO_CLOUD_DATABASE_URL}:{})});
 publisher.configure({enabled:cfg.publishEnabled,showName:cfg.showName});
+// In-app updates from main of the cuedo repository (Settings > Updates).
+const appDir=fileURLToPath(new URL('.',import.meta.url));
+const updater=createUpdater({appDir,restart:()=>{publisher.stop();restartProcess({appDir});}});
 let handleCue=createCueHandler(cfg,undefined,(list,cue)=>catalogue.lookup(list,cue)); let handleDirector=createDirectorHandler(cfg,()=>state.disguise);
 const assets={'/favicon.svg':['favicon.svg','image/svg+xml'],'/settings':['settings.html','text/html'],'/settings.js':['settings.js','text/javascript'],'/settings.css':['settings.css','text/css'],'/disguise':['disguise.html','text/html'],'/disguise.js':['disguise.js','text/javascript'],'/disguise.css':['disguise.css','text/css'],'/eos':['eos.html','text/html'],'/eos.js':['eos.js','text/javascript'],'/eos.css':['eos.css','text/css'],'/':['index.html','text/html'],'/app.js':['app.js','text/javascript'],'/style.css':['style.css','text/css']};
-function handler(req,res){res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Content-Security-Policy',"default-src 'self'; style-src 'self'; script-src 'self'; frame-ancestors 'self'");if(new URL(req.url,'http://localhost').pathname==='/api/disguise/command'){handleDirector(req,res).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}if(new URL(req.url,'http://localhost').pathname==='/api/eos/goto'){handleCue(req,res).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}if(new URL(req.url,'http://localhost').pathname.startsWith('/api/settings')||new URL(req.url,'http://localhost').pathname==='/api/transports'){settingsRoute(req,res).catch(e=>{if(!res.headersSent)res.writeHead(400,{'Content-Type':'application/json'});res.end(JSON.stringify({error:e.message}));});return;}if(req.method!=='GET'){res.writeHead(405);return res.end('Read only');}const u=new URL(req.url,'http://localhost');if(u.pathname==='/api/state'){res.setHeader('Content-Type','application/json');return res.end(JSON.stringify({...state,settings:{revision:cfg.revision,cueLists:cfg.cueLists,controlList:cfg.controlList,transportName:cfg.transportName},now:Date.now()}));}if(u.pathname==='/api/cues'){res.setHeader('Content-Type','application/json');return res.end(JSON.stringify([...catalogue.values()].filter(c=>c.part===0).sort((a,b)=>a.list-b.list||Number(a.number)-Number(b.number))));}const asset=assets[u.pathname];if(!asset){res.writeHead(404);return res.end('Not found');}res.setHeader('Content-Type',asset[1]+'; charset=utf-8');res.end(fs.readFileSync(new URL('./'+asset[0],import.meta.url)));}
+function handler(req,res){res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Content-Security-Policy',"default-src 'self'; style-src 'self'; script-src 'self'; frame-ancestors 'self'");if(new URL(req.url,'http://localhost').pathname==='/api/disguise/command'){handleDirector(req,res).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}if(new URL(req.url,'http://localhost').pathname.startsWith('/api/update')){updateRoute(req,res).catch(e=>{if(!res.headersSent)res.writeHead(400,{'Content-Type':'application/json'});res.end(JSON.stringify({error:e.message}));});return;}if(new URL(req.url,'http://localhost').pathname==='/api/eos/goto'){handleCue(req,res).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}if(new URL(req.url,'http://localhost').pathname.startsWith('/api/settings')||new URL(req.url,'http://localhost').pathname==='/api/transports'){settingsRoute(req,res).catch(e=>{if(!res.headersSent)res.writeHead(400,{'Content-Type':'application/json'});res.end(JSON.stringify({error:e.message}));});return;}if(req.method!=='GET'){res.writeHead(405);return res.end('Read only');}const u=new URL(req.url,'http://localhost');if(u.pathname==='/api/state'){res.setHeader('Content-Type','application/json');return res.end(JSON.stringify({...state,settings:{revision:cfg.revision,cueLists:cfg.cueLists,controlList:cfg.controlList,transportName:cfg.transportName},now:Date.now()}));}if(u.pathname==='/api/cues'){res.setHeader('Content-Type','application/json');return res.end(JSON.stringify([...catalogue.values()].filter(c=>c.part===0).sort((a,b)=>a.list-b.list||Number(a.number)-Number(b.number))));}const asset=assets[u.pathname];if(!asset){res.writeHead(404);return res.end('Not found');}res.setHeader('Content-Type',asset[1]+'; charset=utf-8');res.end(fs.readFileSync(new URL('./'+asset[0],import.meta.url)));}
 const listeners=createListeners(cfg,handler);
 async function settingsRoute(req,res){
  const reply=(status,p)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(p));};
@@ -86,3 +89,15 @@ async function settingsRoute(req,res){
  }finally{saving=false;}
 }
 let saving=false;
+async function updateRoute(req,res){
+ const reply=(status,p)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(p));};
+ const u=new URL(req.url,'http://localhost');
+ if(req.method==='GET'&&u.pathname==='/api/update')return reply(200,updater.status());
+ if(req.method!=='POST')return reply(405,{error:'Method not allowed'});
+ // Only the local Settings page may check for or install updates.
+ if(!allowedRequest(req,cfg.port))return reply(403,{error:'Open Settings from this server'});
+ for await(const chunk of req)if(chunk.length>1024)return reply(413,{error:'Request too large'});
+ if(u.pathname==='/api/update/check')return reply(200,await updater.check());
+ if(u.pathname==='/api/update')return reply(200,await updater.update());
+ return reply(404,{error:'Not found'});
+}
