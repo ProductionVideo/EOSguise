@@ -81,3 +81,9 @@ export function filterShows(rows,query){
 export function sortShows(rows,mode){
  return rows.sort(mode==='name'?(a,b)=>a.name.localeCompare(b.name)||a.id.localeCompare(b.id):(a,b)=>(b.updatedAt??-1)-(a.updatedAt??-1)||a.name.localeCompare(b.name));
 }
+// Cue lists read "List A 1 Main": "List A" is cuedo's slot, "1 Main" is the console's own label (shown as sent).
+// Until the console sends a label (cuedo's placeholder is "Cue list N"), the list number stands in.
+export function listName(name,n){
+ const t=String(name??'').trim();
+ return !t||/^cue ?list \d+$/i.test(t)?String(n):t;
+}

@@ -3,3 +3,4 @@ body{min-height:100dvh}header{flex-wrap:wrap;gap:12px}.settings{max-width:760px;
 
 .network-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#b9c7d2;font-size:14px}.share-toggle{display:flex;align-items:center;gap:8px;cursor:pointer}.share-toggle input{width:17px;height:17px;margin:0;accent-color:#5bbbaa}.network-address.unshared>a,.network-address.unshared>span{color:#7c8c99}#network-status{font-size:13px;color:#a9bdce}
 #publishStatus{font-size:14px;color:#b9c7d2;overflow-wrap:anywhere}#publishStatus.publish-connected{color:#7edbbc}#publishStatus.publish-retrying,#publishStatus.publish-error{color:#f6ad55}#publishLink{color:#a4d5ee;overflow-wrap:anywhere;font-size:14px}#cloud p.hint{margin:0;line-height:1.5}
+#updateStatus{font-size:14px;color:#b9c7d2;overflow-wrap:anywhere}#updates .save-row{flex-wrap:wrap}
