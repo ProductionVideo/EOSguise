@@ -100,8 +100,8 @@ try{
   await until(()=>page.evaluate(`document.querySelector('.cue-number')?.textContent==='12.5'&&document.querySelectorAll('tbody tr').length>=41`),'detail render');
   assert.equal(await page.evaluate(`document.querySelector('.cue-fade').textContent`),'Time 1:30 / 5','Fade shown with hidden label');
   assert.equal(await page.evaluate(`document.querySelector('tr.current td').textContent`),'12.5');
-  assert.deepEqual(await page.evaluate(`[...document.querySelectorAll('.card-head span:first-child')].map(e=>e.textContent)`),['EOS · LIST A 1','EOS · LIST B 2','DISGUISE'],'Cue lists labelled List A / List B with the Eos list number once');
-  assert.deepEqual(await page.evaluate(`[...document.querySelectorAll('.card .head-name')].slice(0,2).map(e=>e.textContent)`),['Main','FX'],'Eos "1 Main" labels shown once, without the repeated number');
+  assert.deepEqual(await page.evaluate(`[...document.querySelectorAll('.card-head span:first-child')].map(e=>e.textContent)`),['EOS · LIST A','EOS · LIST B','DISGUISE'],'Cue lists labelled List A / List B by cuedo');
+  assert.deepEqual(await page.evaluate(`[...document.querySelectorAll('.card .head-name')].slice(0,2).map(e=>e.textContent)`),['1 Main','2 FX'],'Console labels shown exactly as sent');
   assert.deepEqual(await page.evaluate(`[...document.querySelectorAll('.pills span.good')].map(e=>e.textContent)`),['Engaged','Faded up'],'Engaged and Faded up shown as positive');
   a.state={...a.state,eos:{...a.state.eos,lists:{...a.state.eos.lists,1:{name:'Main',current:{number:'13',name:'Night',notes:''},next:{number:'14',name:'Dawn',notes:''}}}}};
   await until(()=>page.evaluate(`document.querySelector('.cue-number')?.textContent==='13'&&document.querySelector('tr.current td')?.textContent==='13'`),'detail live update');

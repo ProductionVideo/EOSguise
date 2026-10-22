@@ -1,4 +1,4 @@
-import {CueCatalogue,listLabel} from './cue-catalogue.mjs';
+import {CueCatalogue} from './cue-catalogue.mjs';
 import {createListeners} from './listeners.mjs';
 import {addresses,allowedRequest} from './network.mjs';
 import {pathToFileURL} from 'node:url';
@@ -27,7 +27,7 @@ let catalogue=new CueCatalogue(),socket,queue=[],counts={},received=new Set(),ge
 function send(address,args=[]){if(!/^\/eos\/(get\/|ping$|cuelist\/[0-9]+\/config\/[0-9]+\/0\/1$|subscribe$)/.test(address))throw Error('Read-only OSC address denied');if(socket&&!socket.destroyed)socket.write(slip(message(address,args)));}
 function connect(){const gen=++generation;clearTimeout(reconnectTimer);socket?.destroy();state.eos.connected=false;state.eos.lists=Object.fromEntries(cfg.cueLists.map(l=>[l,{name:"Cue list "+l,current:null,next:null}]));queue=[];counts={};received.clear();prepareCatalogue();state.eos.loaded=0;state.eos.total=0;for(const l of Object.values(state.eos.lists)){l.current=null;l.next=null;}socket=net.createConnection({host:cfg.eosHost,port:cfg.eosPort});socket.on('connect',()=>{if(gen!==generation)return;state.eos.connected=true;state.eos.error='';state.eos.lastReceived=Date.now();for(const l of cfg.cueLists){send(`/eos/cuelist/${l}/config/${l}/0/1`);send(`/eos/get/cue/${l}/count`);}send('/eos/get/version');send('/eos/subscribe',[1]);});socket.on('data',parser(({address:a,args:v})=>{if(gen!==generation)return;
  state.eos.lastReceived=Date.now();let m;const match=a.match(/\/(?:cuelist|cue)\/(\d+)/);if(match&&!cfg.cueLists.includes(Number(match[1])))return;
- if((m=a.match(/^\/eos\/out\/cuelist\/([0-9]+)$/)))state.eos.lists[m[1]].name=listLabel(v[0],m[1]);
+ if((m=a.match(/^\/eos\/out\/cuelist\/([0-9]+)$/)))state.eos.lists[m[1]].name=String(v[0]??'');
  else if((m=a.match(/^\/eos\/out\/cuelist\/([0-9]+)\/([0-9]+)$/))){const l=state.eos.lists[m[1]],cue={number:String(v[1]||''),name:String(v[2]||''),notes:String(v[3]||''),duration:v[6],remaining:v[7]};if(m[2]==='1'){l.current=/^\s*[\[{]/.test(String(v[0]))?cue:null;l.next=l.current?l.next:cue;}else if(l.current)l.next=cue;}
  else if((m=a.match(/^\/eos\/out\/get\/cue\/([0-9]+)\/count$/))){queue=queue.filter(a=>!a.startsWith('/eos/get/cue/'+m[1]+'/'));for(const key of received)if(key.startsWith(m[1]+'/'))received.delete(key);counts[m[1]]=Math.min(20000,v[0]);catalogue.begin(m[1],counts[m[1]]);state.eos.total=Object.values(counts).reduce((a,b)=>a+b,0);for(let i=0;i<counts[m[1]];i++)queue.push(`/eos/get/cue/${m[1]}/index/${i}`);}
  else if((m=a.match(/^\/eos\/out\/get\/cue\/([0-9]+)\/([^/]+)\/(\d+)\/list\/0\/\d+$/))){const key=`${m[1]}/${m[2]}/${m[3]}`;catalogue.add({list:Number(m[1]),number:m[2],part:Number(m[3]),name:String(v[2]||''),up:Number(v[3]),down:Number(v[5])},v[0]);received.add(m[1]+'/'+v[0]);state.eos.loaded=received.size;}

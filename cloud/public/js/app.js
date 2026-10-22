@@ -173,7 +173,7 @@ function renderDetail(){
  if(d.state?.error)cards.push(h('div',{class:'card error'},d.state.error));
  else if(s){
   for(const n of s.eos.cueLists){const l=s.eos.lists[n];
-   cards.push(h('div',{class:'card'+(fresh&&s.eos.connected?'':' dim')},h('div',{class:'card-head'},h('span',{},'EOS · LIST '+letter(s.eos.cueLists,n)+' '+n),h('span',{class:'head-name',title:cleanName(l.name,n)||null},cleanName(l.name,n))),cueLine('current',l.current,d,n),cueLine('next',l.next,d,n)));}
+   cards.push(h('div',{class:'card'+(fresh&&s.eos.connected?'':' dim')},h('div',{class:'card-head'},h('span',{},'EOS · LIST '+letter(s.eos.cueLists,n)),h('span',{class:'head-name',title:cleanName(l.name,n)},cleanName(l.name,n))),cueLine('current',l.current,d,n),cueLine('next',l.next,d,n)));}
   if(!s.eos.cueLists.length)cards.push(h('div',{class:'card dim'},'No Eos cue lists configured.'));
   const g=s.disguise,timing=v=>M.clock(M.liveSeconds(v,{playmode:g.playmode,ageMs:age,live}));
   const where=[g.track||'No track',g.section!==null?'Section '+g.section+(g.sectionName?' · '+g.sectionName:''):''].filter(Boolean).join(' · ');
@@ -197,7 +197,7 @@ function renderCatalogue(d,s){
  if(tabsKey!==d.tabsKey){
   d.tabsKey=tabsKey;
   $('#list-tabs').replaceChildren(...lists.map(k=>h('button',{type:'button',role:'tab','aria-selected':String(k===n),class:k===n?'active':null,onclick:()=>{d.list=k;d.tableKey=null;d.followed=null;render();}},
-   h('span',{class:'tab-letter'},'List '+letter(lists,k)),h('span',{class:'tab-number'},String(k)),listName(k)?h('span',{class:'tab-name'},listName(k)):null)));
+   h('span',{class:'tab-letter'},'List '+letter(lists,k)),h('span',{class:'tab-name'},listName(k)))));
   $('#list-tabs').hidden=lists.length<2||wide.matches;
  }
  const shown=wide.matches?lists:n===null?[]:[n];
@@ -215,7 +215,7 @@ function renderCatalogue(d,s){
     const isCurrent=current(k)!==null&&Number(c.number)===Number(current(k)),isNext=!isCurrent&&next(k)!==null&&Number(c.number)===Number(next(k));
     return h('tr',{class:isCurrent?'current':isNext?'next':null},h('td',{},c.number),h('td',{class:'name',title:c.name||null},c.name||'(Unlabelled)',isCurrent?hidden(' (current)'):isNext?hidden(' (next)'):null),showTimes?h('td',{class:'time'},M.fadeText(c.up,c.down)):null);
    }));
-   return h('div',{class:'cue-column'},wide.matches?h('h3',{class:'list-title'},'List '+letter(lists,k)+' '+k,listName(k)?h('span',{},listName(k)):null):null,
+   return h('div',{class:'cue-column'},wide.matches?h('h3',{class:'list-title'},'List '+letter(lists,k),h('span',{},listName(k))):null,
     h('div',{class:'table-wrap'},h('table',{},h('thead',{},h('tr',{},h('th',{},'Cue'),h('th',{},'Name'),showTimes?h('th',{class:'time'},'Time'):null)),body)),
     rows.length?null:h('p',{class:'count'},q?'No matching cues':'No cues'));
   }));
