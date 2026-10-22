@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {CueCatalogue} from './cue-catalogue.mjs';
+import {CueCatalogue,listLabel} from './cue-catalogue.mjs';
 const c=new CueCatalogue();
 const cue=(number,list=1,part=0)=>({number,list,part,name:number});
 c.begin(1,2);c.add(cue('1'),0);c.add(cue('139'),1);
@@ -25,4 +25,5 @@ assert.deepEqual([...c.values()],complete,'Reconnect reload must remain atomic')
 c.add(cue('21'),1);
 assert.deepEqual([...c.values()].filter(x=>x.list===1).map(x=>x.number),['10','21']);
 c.reconnect([2]);assert.deepEqual([...c.values()],[cue('5',2)],'Removed lists must not be retained');
-console.log('PASS: atomic refresh, duplicate replies, cue parts, deletion and independent lists');
+for(const [label,n,want] of [['1 Main',1,'Main'],['2 Video','2','Video'],['10 Main',1,'10 Main'],['1: FX',1,'FX'],['Main',1,'Main'],[undefined,1,'']])assert.equal(listLabel(label,n),want,'Eos list label '+label);
+console.log('PASS: Eos "1 Main" list labels, atomic refresh, duplicate replies, cue parts, deletion and independent lists');

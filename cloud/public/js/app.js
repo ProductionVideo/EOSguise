@@ -20,8 +20,7 @@ function h(tag,props={},...children){
 const hidden=text=>h('span',{class:'visually-hidden'},text);
 // The two displayed cue lists are A and B (configured order); the Eos list number is shown beside them.
 const letter=(lists,n)=>lists.indexOf(n)===1?'B':'A';
-// Shown as "List A 7 Main"; placeholder names that only repeat the number are hidden.
-const cleanName=(name,n)=>{const t=String(name||'').trim();return !t||t===String(n)||/^cue ?list \d+$/i.test(t)?'':t;};
+const cleanName=M.listName;
 const prefs={get(key,fallback){try{const v=localStorage.getItem('cues-'+key);return v===null?fallback:JSON.parse(v);}catch{return fallback;}},set(key,value){try{localStorage.setItem('cues-'+key,JSON.stringify(value));}catch{}}};
 
 const app={db:null,offset:0,shows:new Map(),showsState:'loading',connection:'connecting',online:navigator.onLine,verified:new Map(),detail:null,view:null,query:'',sort:prefs.get('sort','recent')};

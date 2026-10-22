@@ -23,6 +23,7 @@ assert.equal(M.liveSeconds(10,{playmode:'Play',ageMs:4000,live:false}),10,'Froze
 assert.equal(M.liveSeconds(10,{playmode:'HoldSection',ageMs:4000,live:true}),10,'Frozen when not playing');
 assert.equal(M.fadeText(5000,3000),'5 / 3');assert.equal(M.fadeText(90000,90000),'1:30');assert.equal(M.fadeText(null,null),'');
 assert.deepEqual(M.sortShows([{id:'2',name:'b',updatedAt:1},{id:'1',name:'a',updatedAt:2},{id:'3',name:'c',updatedAt:null}],'recent').map(s=>s.id),['1','2','3']);
+for(const [name,n,want] of [['1 Main',1,'Main'],['2 Video',2,'Video'],['10 Main',1,'10 Main'],['1: FX',1,'FX'],['1',1,''],['Cue list 7',7,''],['',3,''],[null,3,''],['Main',1,'Main']])assert.equal(M.listName(name,n),want,'list name '+name);
 assert.deepEqual(M.filterShows([{name:'Hamlet'},{name:'Panto'}],' ham').map(s=>s.name),['Hamlet']);
 // The hosted site has no route to local cuedo controls, settings or runtime code, and renders data only as text.
 const site=new URL('../cloud/public/',import.meta.url),files=[];

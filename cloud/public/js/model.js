@@ -81,3 +81,9 @@ export function filterShows(rows,query){
 export function sortShows(rows,mode){
  return rows.sort(mode==='name'?(a,b)=>a.name.localeCompare(b.name)||a.id.localeCompare(b.id):(a,b)=>(b.updatedAt??-1)-(a.updatedAt??-1)||a.name.localeCompare(b.name));
 }
+// Cue lists are shown as "List A 7 Main". Eos labels arrive as "<number> <name>" ("7 Main"), and
+// placeholder names only repeat the number, so both are reduced to just the name ('' when none).
+export function listName(name,n){
+ const t=String(name??'').trim().replace(new RegExp('^'+Number(n)+'(?:\\s*[:.\\-–]\\s*|\\s+)'),'');
+ return !t||t===String(n)||/^cue ?list \d+$/i.test(t)?'':t;
+}

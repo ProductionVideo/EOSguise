@@ -34,3 +34,7 @@ export class CueCatalogue {
  }
  values(){return this.rows.values();}
 }
+// Eos reports cue list labels as "<list number> <name>" ("1 Main"); keep just the name.
+export function listLabel(label,n){
+ return String(label??'').replace(new RegExp('^\\s*'+Number(n)+'(?:\\s*[:.\\-–]\\s*|\\s+)'),'').trim();
+}

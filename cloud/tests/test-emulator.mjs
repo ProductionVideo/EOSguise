@@ -20,7 +20,7 @@ const detail=(extra={})=>({schemaVersion:1,updatedAt:TS,stateJson:'{}',cuesJson:
 const until=async(fn,what,ms=10000)=>{const end=Date.now()+ms;let last;while(Date.now()<end){try{last=await fn();if(last)return last;}catch(e){last=e.message;}await wait(100);}throw Error('Timed out: '+what+' (last: '+JSON.stringify(last)+')');};
 
 function makeShow(cues=40){
- const show={state:{eos:{connected:true,loading:false,cueLists:[1,2],lists:{1:{name:'Main',current:{number:'12.5',name:'Point cue',notes:'Slow build'},next:{number:'13',name:'Night',notes:''}},2:{name:'FX',current:null,next:null}}},disguise:{connected:true,transport:'show',track:'Act 1',section:3,sectionName:'Storm',cue:'1.5',playmode:'Play',engaged:true,output:1,time:83,sectionTime:12}},
+ const show={state:{eos:{connected:true,loading:false,cueLists:[1,2],lists:{1:{name:'1 Main',current:{number:'12.5',name:'Point cue',notes:'Slow build'},next:{number:'13',name:'Night',notes:''}},2:{name:'2 FX',current:null,next:null}}},disguise:{connected:true,transport:'show',track:'Act 1',section:3,sectionName:'Storm',cue:'1.5',playmode:'Play',engaged:true,output:1,time:83,sectionTime:12}},
   catalogue:{version:1,values:[...Array.from({length:cues},(_,i)=>({list:1,number:String(i+1),part:0,name:'Cue '+(i+1),up:3000,down:3000})),{list:1,number:'12.5',part:0,name:'Point cue',up:90000,down:5000}]}};
  show.publisher=createPublisher({getState:()=>show.state,getCatalogue:()=>show.catalogue,databaseURL:`${DB}/?ns=${NS}`,heartbeatMs:1000,minIntervalMs:300,backoffBaseMs:200,backoffMaxMs:1000,catalogueCheckMs:2000});
  return show;
@@ -101,6 +101,7 @@ try{
   assert.equal(await page.evaluate(`document.querySelector('.cue-fade').textContent`),'Time 1:30 / 5','Fade shown with hidden label');
   assert.equal(await page.evaluate(`document.querySelector('tr.current td').textContent`),'12.5');
   assert.deepEqual(await page.evaluate(`[...document.querySelectorAll('.card-head span:first-child')].map(e=>e.textContent)`),['EOS · LIST A 1','EOS · LIST B 2','DISGUISE'],'Cue lists labelled List A / List B with the Eos list number once');
+  assert.deepEqual(await page.evaluate(`[...document.querySelectorAll('.card .head-name')].slice(0,2).map(e=>e.textContent)`),['Main','FX'],'Eos "1 Main" labels shown once, without the repeated number');
   assert.deepEqual(await page.evaluate(`[...document.querySelectorAll('.pills span.good')].map(e=>e.textContent)`),['Engaged','Faded up'],'Engaged and Faded up shown as positive');
   a.state={...a.state,eos:{...a.state.eos,lists:{...a.state.eos.lists,1:{name:'Main',current:{number:'13',name:'Night',notes:''},next:{number:'14',name:'Dawn',notes:''}}}}};
   await until(()=>page.evaluate(`document.querySelector('.cue-number')?.textContent==='13'&&document.querySelector('tr.current td')?.textContent==='13'`),'detail live update');
